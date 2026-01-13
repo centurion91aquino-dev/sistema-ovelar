@@ -7,11 +7,14 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 // --- CONFIGURACIÓN DE BASE DE DATOS ---
+const { Pool } = require('pg');
+
 const pool = new Pool({
-    // Aquí pegas la URL de Supabase que copiaste (la que empieza con postgresql://)
-    connectionString: postgresql://postgres:G21091991_a.@db.zvnzvwakatydltdsfggs.supabase.co:5432/postgres', 
-    ssl: { rejectUnauthorized: false } // Esto es obligatorio para que Supabase acepte la conexión
-    
+    // DEBE DECIR connectionString (en inglés) y el link entre comillas invertidas o simples
+    connectionString: `postgresql://postgres:G21091991_a.@db.zvnzvwakatydltdsfggs.supabase.co:5432/postgres`,
+    ssl: {
+        rejectUnauthorized: false
+    }
 });
 
 const TASA_PYG = 7500;
@@ -390,5 +393,6 @@ app.get('/historial', async (req, res) => {
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => console.log('🚀 SISTEMA OVELAR ONLINE EN PUERTO ' + PORT));
+
 
 
