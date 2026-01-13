@@ -10,8 +10,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 const { Pool } = require('pg');
 
 const pool = new Pool({
-    // DEBE DECIR connectionString (en inglés) y el link entre comillas invertidas o simples
-    connectionString: `postgresql://postgres:G21091991_a.@db.zvnzvwakatydltdsfggs.supabase.co:5432/postgres`,
+    connectionString: process.env.DATABASE_URL,
     ssl: {
         rejectUnauthorized: false
     }
@@ -393,6 +392,7 @@ app.get('/historial', async (req, res) => {
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => console.log('🚀 SISTEMA OVELAR ONLINE EN PUERTO ' + PORT));
+
 
 
 
