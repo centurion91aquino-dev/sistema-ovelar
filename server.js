@@ -9,7 +9,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 // --- CONFIGURACIÓN DE BASE DE DATOS ---
 const pool = new Pool({
     // Aquí pegas la URL de Supabase que copiaste (la que empieza con postgresql://)
-    connectionString: 'PASSWORD]@db.G4781312a22.supabase.co:5432/postgres', 
+    connectionString: 'PASSWORD]@db.G22052013a..supabase.co:5432/postgres', 
     ssl: { rejectUnauthorized: false } // Esto es obligatorio para que Supabase acepte la conexión
     
 });
@@ -388,4 +388,5 @@ app.get('/historial', async (req, res) => {
 });
 
 const PORT = process.env.PORT || 3000;
+
 app.listen(PORT, () => console.log('🚀 SISTEMA OVELAR ONLINE EN PUERTO ' + PORT));
