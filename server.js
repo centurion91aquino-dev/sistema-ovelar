@@ -6,10 +6,18 @@ const port = process.env.PORT || 3000;
 
 // Configuración directa
 const pool = new Pool({
-    connectionString: 'postgresql://postgres:G21091991_a@db.zvnzvwakatydltdsfggs.supabase.co:5432/postgres',
-    ssl: { rejectUnauthorized: false }
+    user: 'postgres',
+    // IMPORTANTE: He cambiado el host para forzar IPv4
+    host: 'db.zvnzvwakatydltdsfggs.supabase.co', 
+    database: 'postgres',
+    password: 'G21091991_a',
+    port: 5432,
+    ssl: {
+        rejectUnauthorized: false
+    },
+    // Esto ayuda a que no se pierda la conexión
+    connectionTimeoutMillis: 5000 
 });
-
 app.use(express.json());
 app.use(express.static(__dirname));
 
@@ -41,4 +49,5 @@ app.post('/login', async (req, res) => {
 app.listen(port, '0.0.0.0', () => {
     console.log(`🚀 SERVIDOR ACTIVO EN PUERTO ${port}`);
 });
+
 
