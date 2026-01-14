@@ -5,23 +5,19 @@ const path = require('path');
 const app = express();
 const port = process.env.PORT || 3000;
 
-// Configuración directa para Distribuidora Ovelar
 const pool = new Pool({
     connectionString: 'postgresql://postgres:G21091991_a.@db.zvnzvwakatydltdsfggs.supabase.co:5432/postgres',
-    ssl: {
-        rejectUnauthorized: false
-    }
+    ssl: { rejectUnauthorized: false }
 });
 
 app.use(express.json());
-app.use(express.static(path.join(__dirname, 'public')));
+// CAMBIO AQUÍ: Ahora busca los archivos en la carpeta principal, no en /public
+app.use(express.static(path.join(__dirname))); 
 
-// Ruta principal
 app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+    res.sendFile(path.join(__dirname, 'index.html'));
 });
 
-// Ruta de Login
 app.post('/login', async (req, res) => {
     const { nombre_usuario, contrasena } = req.body;
     try {
@@ -35,16 +31,11 @@ app.post('/login', async (req, res) => {
             res.status(401).json({ success: false, message: 'Usuario o clave incorrecta' });
         }
     } catch (err) {
-        console.error('Error en login:', err);
-        res.status(500).json({ success: false, message: 'Error de conexión con la base de datos' });
+        console.error(err);
+        res.status(500).json({ success: false, message: 'Error de base de datos' });
     }
 });
 
 app.listen(port, '0.0.0.0', () => {
-    console.log(`🚀 SISTEMA OVELAR ONLINE EN PUERTO ${port}`);
+    console.log(`🚀 SISTEMA OVELAR ONLINE`);
 });
-
-
-
-
-
