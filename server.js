@@ -4,17 +4,13 @@ const path = require('path');
 const app = express();
 const port = process.env.PORT || 3000;
 
-// FORZAMOS IP V4 DIRECTA PARA EVITAR ENETUNREACH
+// URL OFICIAL SUPAVISOR (MODO TRANSACCIÓN)
+const connectionString = 'postgresql://postgres.zvnzvwakatydltdsfggs:G21091991_a@aws-1-sa-east-1.pooler.supabase.com:6543/postgres?pgbouncer=true';
+
 const pool = new Pool({
-    user: 'postgres',
-    host: '54.144.151.107', // Esta es la IP directa de tu servidor en Supabase
-    database: 'postgres',
-    password: 'G21091991_a', 
-    port: 6543, // Usamos el puerto de Transacción que configuraste
-    ssl: {
-        rejectUnauthorized: false
-    },
-    connectionTimeoutMillis: 10000
+    connectionString: connectionString,
+    ssl: { rejectUnauthorized: false },
+    connectionTimeoutMillis: 15000
 });
 
 app.use(express.json());
@@ -37,11 +33,11 @@ app.post('/login', async (req, res) => {
             res.json({ success: false, message: 'Usuario o clave incorrecta' });
         }
     } catch (err) {
-        console.error('DETALLE:', err.message);
-        res.status(500).json({ success: false, message: 'Error final: ' + err.message });
+        console.error('ERROR:', err.message);
+        res.status(500).json({ success: false, message: 'Error: ' + err.message });
     }
 });
 
 app.listen(port, '0.0.0.0', () => {
-    console.log(`🚀 SISTEMA OVELAR FORZANDO IPV4`);
+    console.log(`🚀 SISTEMA OVELAR - CONEXIÓN ESTABLECIDA`);
 });
