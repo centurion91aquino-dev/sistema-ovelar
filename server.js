@@ -4,8 +4,8 @@ const path = require('path');
 const app = express();
 const port = process.env.PORT || 3000;
 
-// URL OFICIAL SUPAVISOR (MODO TRANSACCIÓN)
-const connectionString = 'postgresql://postgres.zvnzvwakatydltdsfggs:G21091991_a@aws-1-sa-east-1.pooler.supabase.com:6543/postgres?pgbouncer=true';
+// URL ACTUALIZADA CON TU NUEVA CLAVE Y MODO TRANSACCIÓN
+const connectionString = 'postgresql://postgres.zvnzvwakatydltdsfggs:Ovelar26202026@aws-1-sa-east-1.pooler.supabase.com:6543/postgres?pgbouncer=true';
 
 const pool = new Pool({
     connectionString: connectionString,
@@ -34,10 +34,10 @@ app.post('/login', async (req, res) => {
         }
     } catch (err) {
         console.error('ERROR:', err.message);
-        res.status(500).json({ success: false, message: 'Error: ' + err.message });
+        res.status(500).json({ success: false, message: 'Error de acceso: ' + err.message });
     }
 });
 
 app.listen(port, '0.0.0.0', () => {
-    console.log(`🚀 SISTEMA OVELAR - CONEXIÓN ESTABLECIDA`);
+    console.log(`🚀 SISTEMA OVELAR - LISTO CON NUEVA CLAVE`);
 });
