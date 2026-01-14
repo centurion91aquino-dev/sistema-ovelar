@@ -6,7 +6,7 @@ const port = process.env.PORT || 3000;
 
 // Configuración directa
 const pool = new Pool({
-    connectionString: 'postgresql://postgres:G21091991_a.@db.zvnzvwakatydltdsfggs.supabase.co:5432/postgres',
+    connectionString: 'postgresql://postgres:G21091991_a@db.zvnzvwakatydltdsfggs.supabase.co:5432/postgres',
     ssl: { rejectUnauthorized: false }
 });
 
@@ -41,3 +41,4 @@ app.post('/login', async (req, res) => {
 app.listen(port, '0.0.0.0', () => {
     console.log(`🚀 SERVIDOR ACTIVO EN PUERTO ${port}`);
 });
+
