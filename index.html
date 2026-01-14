@@ -5,53 +5,113 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sistema Ovelar - Ventas</title>
     <style>
-        body { font-family: Arial, sans-serif; background-color: #f4f7f6; margin: 0; padding: 20px; }
-        .login-container, .sistema-container { background: white; padding: 25px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); max-width: 800px; margin: auto; }
+        /* FONDO AZUL PROFESIONAL */
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); 
+            margin: 0; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            min-height: 100vh;
+            color: #333;
+        }
+
+        /* CONTENEDORES */
+        .card { 
+            background: white; 
+            padding: 30px; 
+            border-radius: 12px; 
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3); 
+            width: 100%;
+            max-width: 400px; /* Tamaño para login */
+            transition: max-width 0.5s;
+        }
+
+        .venta-modo { max-width: 900px; } /* Se ensancha al entrar */
+
         .hidden { display: none; }
-        h2 { color: #2c3e50; border-bottom: 2px solid #3498db; padding-bottom: 10px; }
-        
-        /* Estilos Formulario */
-        .section { margin-bottom: 20px; padding: 15px; border: 1px solid #eee; border-radius: 8px; }
-        input { padding: 10px; width: calc(100% - 22px); margin-bottom: 10px; border: 1px solid #ddd; border-radius: 5px; }
-        button { padding: 10px 20px; background-color: #3498db; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
+
+        h2 { text-align: center; color: #1e3c72; margin-top: 0; }
+
+        /* INPUTS Y BOTONES */
+        input { 
+            padding: 12px; 
+            width: 100%; 
+            margin-bottom: 15px; 
+            border: 1px solid #ddd; 
+            border-radius: 6px; 
+            box-sizing: border-box;
+            font-size: 16px;
+        }
+
+        button { 
+            padding: 12px; 
+            width: 100%; 
+            background-color: #3498db; 
+            color: white; 
+            border: none; 
+            border-radius: 6px; 
+            cursor: pointer; 
+            font-weight: bold;
+            font-size: 16px;
+        }
+
         button:hover { background-color: #2980b9; }
 
-        /* Buscador Sugerencias */
-        .sugerencias { border: 1px solid #ddd; background: white; position: absolute; width: 300px; z-index: 100; max-height: 150px; overflow-y: auto; }
+        /* BUSCADORES Y TABLAS */
+        .section { background: #f9f9f9; padding: 15px; border-radius: 8px; margin-bottom: 15px; border-left: 5px solid #3498db; position: relative; }
+        
+        .sugerencias { 
+            border: 1px solid #ddd; 
+            background: white; 
+            position: absolute; 
+            width: calc(100% - 30px); 
+            z-index: 100; 
+            max-height: 150px; 
+            overflow-y: auto;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        
         .sugerencia-item { padding: 10px; cursor: pointer; border-bottom: 1px solid #eee; }
-        .sugerencia-item:hover { background-color: #f0f0f0; }
+        .sugerencia-item:hover { background-color: #ebf5fb; }
 
-        /* Tabla de Ventas */
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th, td { padding: 12px; border: 1px solid #ddd; text-align: left; }
-        th { background-color: #3498db; color: white; }
-        .total-container { text-align: right; font-size: 24px; font-weight: bold; margin-top: 20px; color: #e74c3c; }
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; background: white; }
+        th, td { padding: 12px; border: 1px solid #eee; text-align: left; }
+        th { background-color: #34495e; color: white; }
+
+        .total-container { text-align: right; font-size: 26px; font-weight: bold; margin-top: 20px; color: #2c3e50; }
+        
+        .btn-finalizar { background-color: #27ae60; margin-top: 10px; font-size: 18px; }
     </style>
 </head>
 <body>
 
-    <div id="login-screen" class="login-container">
-        <h2>Sistema Ovelar - Acceso</h2>
+    <div id="login-screen" class="card">
+        <h2>Sistema Ovelar</h2>
+        <p style="text-align: center; color: #666;">Ingrese sus credenciales</p>
         <input type="text" id="user" placeholder="Usuario">
         <input type="password" id="pass" placeholder="Contraseña">
-        <button onclick="login()">Ingresar</button>
-        <p id="msg-error" style="color: red;"></p>
+        <button onclick="login()">Iniciar Sesión</button>
+        <p id="msg-error" style="color: #e74c3c; text-align: center; font-size: 14px;"></p>
     </div>
 
-    <div id="venta-screen" class="sistema-container hidden">
-        <h2>Nueva Venta</h2>
+    <div id="venta-screen" class="card venta-modo hidden">
+        <h2>Panel de Ventas</h2>
         
-        <div class="section">
-            <label><strong>Cliente:</strong></label>
-            <input type="text" id="busc-cliente" placeholder="Buscar cliente por nombre o RUC..." onkeyup="buscarCliente()">
-            <div id="lista-clientes" class="sugerencias"></div>
-            <p id="cliente-seleccionado">Cliente: <i>No seleccionado</i></p>
-        </div>
+        <div style="display: flex; gap: 20px;">
+            <div class="section" style="flex: 1;">
+                <label><strong>1. Buscar Cliente:</strong></label>
+                <input type="text" id="busc-cliente" placeholder="Nombre o RUC..." onkeyup="buscarCliente()">
+                <div id="lista-clientes" class="sugerencias"></div>
+                <p id="cliente-seleccionado" style="margin-top: 10px; font-size: 14px; color: #2c3e50;">Cliente: <i>Consumidor Final</i></p>
+            </div>
 
-        <div class="section">
-            <label><strong>Producto:</strong></label>
-            <input type="text" id="busc-producto" placeholder="Escribe nombre o código del producto..." onkeyup="buscarProducto()">
-            <div id="lista-productos" class="sugerencias"></div>
+            <div class="section" style="flex: 1;">
+                <label><strong>2. Buscar Producto:</strong></label>
+                <input type="text" id="busc-producto" placeholder="Nombre o Código..." onkeyup="buscarProducto()">
+                <div id="lista-productos" class="sugerencias"></div>
+            </div>
         </div>
 
         <table>
@@ -59,25 +119,25 @@
                 <tr>
                     <th>Producto</th>
                     <th>Precio</th>
-                    <th>Cant.</th>
+                    <th style="width: 80px;">Cant.</th>
                     <th>Subtotal</th>
-                    <th>Acción</th>
+                    <th style="width: 40px;"></th>
                 </tr>
             </thead>
-            <tbody id="tabla-venta">
-                </tbody>
+            <tbody id="tabla-venta"></tbody>
         </table>
 
         <div class="total-container">
             Total: <span id="gran-total">0</span> Gs.
         </div>
-        <br>
-        <button onclick="finalizarVenta()" style="background-color: #27ae60; width: 100%;">REGISTRAR VENTA</button>
+        
+        <button class="btn-finalizar" onclick="finalizarVenta()">REGISTRAR VENTA</button>
+        <button onclick="location.reload()" style="background: #95a5a6; margin-top: 10px; width: auto; font-size: 12px; padding: 5px 15px; float: right;">Cerrar Sesión</button>
     </div>
 
     <script>
         let carrito = [];
-        let clienteActual = null;
+        let clienteActual = {nombre: "Consumidor Final", ruc: "0"};
 
         async function login() {
             const user = document.getElementById('user').value;
@@ -91,6 +151,9 @@
             if(data.success) {
                 document.getElementById('login-screen').classList.add('hidden');
                 document.getElementById('venta-screen').classList.remove('hidden');
+                // Al entrar, centramos el contenedor de ventas
+                document.body.style.alignItems = "flex-start";
+                document.body.style.paddingTop = "40px";
             } else {
                 document.getElementById('msg-error').innerText = data.message;
             }
@@ -98,7 +161,7 @@
 
         async function buscarCliente() {
             const term = document.getElementById('busc-cliente').value;
-            if(term.length < 2) { document.getElementById('lista-clientes').innerHTML = ''; return; }
+            if(term.length < 1) { document.getElementById('lista-clientes').innerHTML = ''; return; }
             const res = await fetch(`/buscar-cliente?term=${term}`);
             const clientes = await res.json();
             let html = '';
@@ -117,7 +180,7 @@
 
         async function buscarProducto() {
             const term = document.getElementById('busc-producto').value;
-            if(term.length < 2) { document.getElementById('lista-productos').innerHTML = ''; return; }
+            if(term.length < 1) { document.getElementById('lista-productos').innerHTML = ''; return; }
             const res = await fetch(`/buscar-producto?term=${term}`);
             const productos = await res.json();
             let html = '';
@@ -159,21 +222,20 @@
                 html += `
                     <tr>
                         <td>${p.nombre}</td>
-                        <td>${p.precio}</td>
-                        <td><input type="number" value="${p.cantidad}" style="width: 50px" onchange="cambiarCantidad(${index}, this.value)"></td>
-                        <td>${p.precio * p.cantidad}</td>
-                        <td><button onclick="eliminarItem(${index})" style="background:red">X</button></td>
+                        <td>${Number(p.precio).toLocaleString()}</td>
+                        <td><input type="number" value="${p.cantidad}" style="margin:0; padding:5px" onchange="cambiarCantidad(${index}, this.value)"></td>
+                        <td>${subtotal.toLocaleString()} Gs.</td>
+                        <td><button onclick="eliminarItem(${index})" style="background:#e74c3c; padding: 5px 10px;">X</button></td>
                     </tr>
                 `;
             });
             document.getElementById('tabla-venta').innerHTML = html;
-            document.getElementById('gran-total').innerText = total;
+            document.getElementById('gran-total').innerText = total.toLocaleString();
         }
 
         function finalizarVenta() {
-            if(!clienteActual) return alert("Selecciona un cliente");
             if(carrito.length === 0) return alert("El carrito está vacío");
-            alert("Venta registrada con éxito (Simulación)");
+            alert(`Venta registrada a nombre de: ${clienteActual.nombre}\nTotal: ${document.getElementById('gran-total').innerText} Gs.`);
             carrito = [];
             renderizarTabla();
         }
