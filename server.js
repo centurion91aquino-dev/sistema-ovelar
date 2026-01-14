@@ -4,22 +4,20 @@ const path = require('path');
 const app = express();
 const port = process.env.PORT || 3000;
 
-// URL ACTUALIZADA CON TU NUEVA CLAVE Y MODO TRANSACCIÓN
+// Configuración de conexión (Transaction Pooler)
 const connectionString = 'postgresql://postgres.zvnzvwakatydltdsfggs:Ovelar26202026@aws-1-sa-east-1.pooler.supabase.com:6543/postgres?pgbouncer=true';
 
 const pool = new Pool({
     connectionString: connectionString,
-    ssl: { rejectUnauthorized: false },
-    connectionTimeoutMillis: 15000
+    ssl: { rejectUnauthorized: false }
 });
 
 app.use(express.json());
 app.use(express.static(__dirname));
 
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'index.html'));
-});
+// --- RUTAS DEL SISTEMA ---
 
+// 1. Login
 app.post('/login', async (req, res) => {
     const { nombre_usuario, contrasena } = req.body;
     try {
@@ -28,16 +26,47 @@ app.post('/login', async (req, res) => {
             [nombre_usuario, contrasena]
         );
         if (result.rows.length > 0) {
-            res.json({ success: true, user: result.rows[0] });
+            res.json({ success: true });
         } else {
             res.json({ success: false, message: 'Usuario o clave incorrecta' });
         }
     } catch (err) {
-        console.error('ERROR:', err.message);
-        res.status(500).json({ success: false, message: 'Error de acceso: ' + err.message });
+        res.status(500).json({ success: false, message: err.message });
     }
 });
 
+// 2. Buscador de Productos (Busca por nombre o código)
+app.get('/buscar-producto', async (req, res) => {
+    const term = req.query.term;
+    try {
+        const result = await pool.query(
+            "SELECT * FROM productos WHERE nombre ILIKE $1 OR codigo ILIKE $1 LIMIT 5",
+            [`%${term}%`]
+        );
+        res.json(result.rows);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// 3. Buscador de Clientes (Busca por nombre o RUC)
+app.get('/buscar-cliente', async (req, res) => {
+    const term = req.query.term;
+    try {
+        const result = await pool.query(
+            "SELECT * FROM clientes WHERE nombre ILIKE $1 OR ruc_cedula ILIKE $1 LIMIT 5",
+            [`%${term}%`]
+        );
+        res.json(result.rows);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'index.html'));
+});
+
 app.listen(port, '0.0.0.0', () => {
-    console.log(`🚀 SISTEMA OVELAR - LISTO CON NUEVA CLAVE`);
+    console.log(`🚀 SERVIDOR VENTAS ONLINE EN PUERTO ${port}`);
 });
