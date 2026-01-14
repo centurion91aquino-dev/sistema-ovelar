@@ -1,7 +1,6 @@
 const express = require('express');
 const { Pool } = require('pg');
 const path = require('path');
-
 const app = express();
 const port = process.env.PORT || 3000;
 
@@ -11,8 +10,7 @@ const pool = new Pool({
 });
 
 app.use(express.json());
-// CAMBIO AQUÍ: Ahora busca los archivos en la carpeta principal, no en /public
-app.use(express.static(path.join(__dirname))); 
+app.use(express.static(__dirname));
 
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
@@ -31,7 +29,6 @@ app.post('/login', async (req, res) => {
             res.status(401).json({ success: false, message: 'Usuario o clave incorrecta' });
         }
     } catch (err) {
-        console.error(err);
         res.status(500).json({ success: false, message: 'Error de base de datos' });
     }
 });
