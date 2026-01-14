@@ -7,8 +7,6 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 // --- CONFIGURACIÓN DE BASE DE DATOS ---
-const { Pool } = require('pg');
-
 const pool = new Pool({
     connectionString: process.env.DATABASE_URL,
     ssl: {
@@ -392,6 +390,7 @@ app.get('/historial', async (req, res) => {
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => console.log('🚀 SISTEMA OVELAR ONLINE EN PUERTO ' + PORT));
+
 
 
 
