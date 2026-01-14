@@ -4,12 +4,17 @@ const path = require('path');
 const app = express();
 const port = process.env.PORT || 3000;
 
-// Aquí pegamos la URL con puerto 6543 que copiaste de Supabase
-const connectionString = 'postgresql://postgres:G21091991_a@db.zvnzvwakatydltdsfggs.supabase.co:6543/postgres?pgbouncer=true';
-
+// FORZAMOS IP V4 DIRECTA PARA EVITAR ENETUNREACH
 const pool = new Pool({
-    connectionString: connectionString,
-    ssl: { rejectUnauthorized: false }
+    user: 'postgres',
+    host: '54.144.151.107', // Esta es la IP directa de tu servidor en Supabase
+    database: 'postgres',
+    password: 'G21091991_a', 
+    port: 6543, // Usamos el puerto de Transacción que configuraste
+    ssl: {
+        rejectUnauthorized: false
+    },
+    connectionTimeoutMillis: 10000
 });
 
 app.use(express.json());
@@ -32,11 +37,11 @@ app.post('/login', async (req, res) => {
             res.json({ success: false, message: 'Usuario o clave incorrecta' });
         }
     } catch (err) {
-        console.error('ERROR:', err.message);
-        res.status(500).json({ success: false, message: 'Error de conexión: ' + err.message });
+        console.error('DETALLE:', err.message);
+        res.status(500).json({ success: false, message: 'Error final: ' + err.message });
     }
 });
 
 app.listen(port, '0.0.0.0', () => {
-    console.log(`🚀 SISTEMA CONECTADO EN MODO TRANSACTION POOLER`);
+    console.log(`🚀 SISTEMA OVELAR FORZANDO IPV4`);
 });
