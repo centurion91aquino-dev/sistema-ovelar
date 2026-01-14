@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema Ovelar - Login</title>
+    <style>
+        body { font-family: sans-serif; background: #004481; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; color: white; }
+        .login-card { background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); color: #333; width: 300px; text-align: center; }
+        h2 { color: #004481; }
+        input { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+        button { width: 100%; padding: 10px; background: #004481; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        button:hover { background: #002d55; }
+    </style>
+</head>
+<body>
+    <div class="login-card">
+        <h2>SISTEMA OVELAR</h2>
+        <input type="text" id="usuario" placeholder="Usuario">
+        <input type="password" id="clave" placeholder="Contraseña">
+        <button onclick="ingresar()">Ingresar</button>
+        <p id="mensaje" style="color: red; font-size: 14px;"></p>
+    </div>
+
+    <script>
+        async function ingresar() {
+            const nombre_usuario = document.getElementById('usuario').value;
+            const contrasena = document.getElementById('clave').value;
+            const mensaje = document.getElementById('mensaje');
+
+            const resp = await fetch('/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ nombre_usuario, contrasena })
+            });
+
+            const data = await resp.json();
+            if (data.success) {
+                alert('¡Bienvenido!');
+                // Aquí podrías redirigir a un panel de control
+            } else {
+                mensaje.innerText = data.message;
+            }
+        }
+    </script>
+</body>
+</html>
