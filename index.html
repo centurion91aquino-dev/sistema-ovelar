@@ -134,7 +134,6 @@
 </thead>
         // --- PRODUCTOS ---
         function abrirProductos() { mostrarSeccion('prod-screen'); listarProductos(); }
-        
         async function listarProductos() {
             const res = await fetch('/productos');
             const data = await res.json();
@@ -147,7 +146,10 @@
                     <td>${Number(p.precio).toLocaleString()}</td>
                     <td>${p.stock}</td>
                     <td>
-                        <button onclick='prepararEdicion(${JSON.stringify(p)})' style="background:#f39c12; width:auto; padding:5px 10px;">Editar</button>
+                        <div style="display: flex; gap: 5px;">
+                            <button onclick='prepararEdicion(${JSON.stringify(p)})' style="background:#f39c12; width:auto; padding:5px 10px; font-size:12px;">Editar</button>
+                            <button onclick="eliminarProducto(${p.id})" style="background:#e74c3c; width:auto; padding:5px 10px; font-size:12px;">Eliminar</button>
+                        </div>
                     </td>
                 </tr>`;
             });
@@ -178,7 +180,27 @@
                 stock: document.getElementById('p-stock').value,
                 imagen_url: document.getElementById('p-img').value
             };
+async function eliminarProducto(id) {
+            if (!confirm("¿Estás seguro de que deseas eliminar este producto? Esta acción no se puede deshacer.")) {
+                return;
+            }
 
+            try {
+                const res = await fetch(`/eliminar-producto/${id}`, {
+                    method: 'DELETE'
+                });
+
+                if (res.ok) {
+                    alert("Producto eliminado correctamente");
+                    listarProductos(); // Recargamos la lista
+                } else {
+                    alert("Error al eliminar el producto");
+                }
+            } catch (error) {
+                console.error("Error:", error);
+                alert("Hubo un error de conexión");
+            }
+        }
             const res = await fetch('/guardar-producto', {
                 method: 'POST', 
                 headers: {'Content-Type': 'application/json'},
