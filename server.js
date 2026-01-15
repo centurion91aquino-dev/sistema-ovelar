@@ -24,29 +24,48 @@ app.post('/login', async (req, res) => {
     } catch (err) { res.status(500).json({ success: false }); }
 });
 
-// LISTAR TODOS LOS PRODUCTOS
-app.get('/productos', async (req, res) => {
-    try {
-        const result = await pool.query('SELECT * FROM productos ORDER BY nombre ASC');
-        res.json(result.rows);
-    } catch (err) { res.status(500).json({ error: err.message }); }
-});
+// ... (Mantén tu configuración de Pool arriba)
 
-// GUARDAR O ACTUALIZAR PRODUCTO
+// GUARDAR PRODUCTO CON IMAGEN
 app.post('/guardar-producto', async (req, res) => {
-    const { codigo, nombre, precio, stock } = req.body;
+    const { codigo, nombre, precio, stock, imagen_url } = req.body;
     try {
         await pool.query(
-            `INSERT INTO productos (codigo, nombre, precio, stock) 
-             VALUES ($1, $2, $3, $4) 
+            `INSERT INTO productos (codigo, nombre, precio, stock, imagen_url) 
+             VALUES ($1, $2, $3, $4, $5) 
              ON CONFLICT (codigo) DO UPDATE 
-             SET nombre = EXCLUDED.nombre, precio = EXCLUDED.precio, stock = EXCLUDED.stock`,
-            [codigo, nombre, precio, stock]
+             SET nombre = EXCLUDED.nombre, precio = EXCLUDED.precio, stock = EXCLUDED.stock, imagen_url = EXCLUDED.imagen_url`,
+            [codigo, nombre, precio, stock, imagen_url]
         );
         res.json({ success: true });
-    } catch (err) { res.status(500).json({ success: false, error: err.message }); }
+    } catch (err) { res.status(500).json({ success: false }); }
 });
 
+// FINALIZAR VENTA Y RESTAR STOCK
+app.post('/finalizar-venta', async (req, res) => {
+    const { cliente, carrito, total } = req.body;
+    const client = await pool.connect();
+    try {
+        await client.query('BEGIN');
+        const ventaRes = await client.query('INSERT INTO ventas (cliente_nombre, total) VALUES ($1, $2) RETURNING id', [cliente, total]);
+        const ventaId = ventaRes.rows[0].id;
+
+        for (let item of carrito) {
+            // Insertar detalle
+            await client.query('INSERT INTO ventas_detalle (venta_id, producto_id, cantidad, precio_unitario) VALUES ($1, $2, $3, $4)', 
+            [ventaId, item.id, item.cantidad, item.precio]);
+            
+            // RESTAR STOCK
+            await client.query('UPDATE productos SET stock = stock - $1 WHERE id = $2', [item.cantidad, item.id]);
+        }
+        
+        await client.query('COMMIT');
+        res.json({ success: true });
+    } catch (err) {
+        await client.query('ROLLBACK');
+        res.status(500).json({ success: false, error: err.message });
+    } finally { client.release(); }
+});
 app.get('/buscar-producto', async (req, res) => {
     const term = req.query.term;
     const result = await pool.query("SELECT * FROM productos WHERE nombre ILIKE $1 OR codigo ILIKE $1 LIMIT 5", [`%${term}%`]);
@@ -62,3 +81,4 @@ app.get('/buscar-cliente', async (req, res) => {
 app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'index.html')));
 
 app.listen(port, '0.0.0.0', () => console.log(`🚀 SISTEMA OVELAR V2 EN MARCHA`));
+
