@@ -121,13 +121,34 @@
         async function login() {
             const user = document.getElementById('user').value;
             const pass = document.getElementById('pass').value;
+            const msg = document.getElementById('msg-error');
+            
+            if(!user || !pass) {
+                msg.innerText = "Completa todos los campos";
+                return;
+            }
+
             try {
+                msg.innerText = "Cargando...";
                 const res = await fetch('/login', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({nombre_usuario: user, contrasena: pass})
                 });
+                
+                if (!res.ok) throw new Error("Error en servidor");
+
                 const data = await res.json();
+                if(data.success) {
+                    mostrarSeccion('menu-screen');
+                } else {
+                    msg.innerText = "Usuario o clave incorrecta";
+                }
+            } catch(e) { 
+                console.error(e);
+                msg.innerText = "Error de conexión. Revisa si Render está encendido.";
+            }
+        }        const data = await res.json();
                 if(data.success) mostrarSeccion('menu-screen');
                 else document.getElementById('msg-error').innerText = "Usuario o clave incorrecta";
             } catch(e) { alert("Error al conectar con el servidor"); }
