@@ -9,50 +9,43 @@
         .card { background: white; padding: 25px; border-radius: 12px; width: 100%; max-width: 400px; text-align: center; box-sizing: border-box; box-shadow: 0 10px 20px rgba(0,0,0,0.2); }
         .hidden { display: none; }
         .full-screen { max-width: 950px; text-align: left; }
-        
         input { padding: 12px; width: 100%; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; font-size: 16px; }
         button { padding: 12px; background: #3498db; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; width: 100%; margin-bottom: 5px; }
-        button:hover { background: #2980b9; }
-
-        .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px; }
+        .menu-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 15px; margin-top: 20px; }
         .menu-item { background: #f8f9fa; padding: 20px; border-radius: 10px; cursor: pointer; border: 1px solid #eee; text-align: center; font-weight: bold; }
-        .menu-item:hover { background: #ebf5fb; border-color: #3498db; }
-
         .section { background: #f9f9f9; padding: 15px; border-radius: 8px; margin-bottom: 15px; border-left: 5px solid #3498db; position: relative; }
         .table-wrapper { overflow-x: auto; width: 100%; background: white; border-radius: 8px; }
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        th, td { padding: 10px; border: 1px solid #eee; text-align: left; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; min-width: 600px; }
+        th, td { padding: 10px; border: 1px solid #eee; text-align: left; font-size: 14px; }
         th { background: #34495e; color: white; }
         .img-tabla { width: 45px; height: 45px; object-fit: cover; border-radius: 5px; }
-
-        .sugerencias { border: 1px solid #ddd; background: white; position: absolute; width: calc(100% - 30px); z-index: 100; max-height: 150px; overflow-y: auto; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+        .sugerencias { border: 1px solid #ddd; background: white; position: absolute; width: calc(100% - 30px); z-index: 100; max-height: 150px; overflow-y: auto; }
         .sugerencia-item { padding: 10px; cursor: pointer; border-bottom: 1px solid #eee; display: flex; align-items: center; gap: 10px; }
-        .sugerencia-item:hover { background: #ebf5fb; }
-        .total-container { text-align: right; font-size: 26px; font-weight: bold; margin-top: 15px; color: #2c3e50; }
     </style>
 </head>
 <body>
 
     <div id="login-screen" class="card">
-        <h2 style="color:#1e3c72">SISTEMA OVELAR</h2>
+        <h2>SISTEMA OVELAR</h2>
         <input type="text" id="user" placeholder="Usuario">
         <input type="password" id="pass" placeholder="Contraseña">
         <button onclick="ejecutarLogin()">INGRESAR</button>
         <p id="msg-error" style="color:red; font-size: 14px;"></p>
     </div>
 
-    <div id="menu-screen" class="card hidden" style="max-width: 500px;">
+    <div id="menu-screen" class="card hidden" style="max-width: 600px;">
         <h2>Panel de Control</h2>
         <div class="menu-grid">
-            <div class="menu-item" onclick="abrirVentas()">🛒 VENTAS</div>
-            <div class="menu-item" onclick="abrirProductos()">📦 PRODUCTOS</div>
+            <div class="menu-item" onclick="abrirVentas()">🛒<br>VENTAS</div>
+            <div class="menu-item" onclick="abrirProductos()">📦<br>PRODUCTOS</div>
+            <div class="menu-item" onclick="abrirReportes()">📊<br>REPORTES</div>
         </div>
         <br><button onclick="location.reload()" style="background:#95a5a6">Cerrar Sesión</button>
     </div>
 
     <div id="prod-screen" class="card full-screen hidden">
         <button onclick="mostrarSeccion('menu-screen')" style="width:auto; background:#7f8c8d;">← Volver</button>
-        <h3>Gestión de Inventario</h3>
+        <h3>Inventario</h3>
         <div class="section">
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
                 <input type="text" id="p-cod" placeholder="Código">
@@ -61,11 +54,11 @@
                 <input type="number" id="p-stock" placeholder="Stock">
             </div>
             <input type="text" id="p-img" placeholder="Link de Foto (URL)">
-            <button onclick="guardarProducto()" style="background:#27ae60">GUARDAR PRODUCTO</button>
+            <button id="btn-guardar-prod" onclick="guardarProducto()" style="background:#27ae60">GUARDAR PRODUCTO</button>
         </div>
         <div class="table-wrapper">
             <table>
-                <thead><tr><th>Foto</th><th>Cód</th><th>Nombre</th><th>Precio</th><th>Stock</th></tr></thead>
+                <thead><tr><th>Foto</th><th>Cód</th><th>Nombre</th><th>Precio</th><th>Stock</th><th>Acción</th></tr></thead>
                 <tbody id="lista-prod-body"></tbody>
             </table>
         </div>
@@ -73,179 +66,124 @@
 
     <div id="venta-screen" class="card full-screen hidden">
         <button onclick="mostrarSeccion('menu-screen')" style="width:auto; background:#7f8c8d;">← Volver</button>
-        <h3>Módulo de Ventas</h3>
+        <h3>Nueva Venta</h3>
         <div style="display: flex; flex-wrap: wrap; gap: 15px;">
             <div class="section" style="flex: 1; min-width: 250px;">
-                <label><strong>Cliente:</strong></label>
                 <input type="text" id="busc-cliente" placeholder="Buscar cliente..." onkeyup="buscarCliente()">
                 <div id="lista-clientes" class="sugerencias"></div>
                 <p id="cliente-seleccionado">Cliente: <b>Consumidor Final</b></p>
             </div>
             <div class="section" style="flex: 1; min-width: 250px;">
-                <label><strong>Producto:</strong></label>
-                <input type="text" id="busc-producto" placeholder="Nombre o Código..." onkeyup="buscarProducto()">
+                <input type="text" id="busc-producto" placeholder="Buscar producto..." onkeyup="buscarProducto()">
                 <div id="lista-productos" class="sugerencias"></div>
             </div>
         </div>
         <div class="table-wrapper">
-            <table>
+            <table id="tabla-venta-items">
                 <thead><tr><th>Foto</th><th>Producto</th><th>Precio</th><th>Cant.</th><th>Subtotal</th><th></th></tr></thead>
                 <tbody id="tabla-venta"></tbody>
             </table>
         </div>
-        <div class="total-container">Total: <span id="gran-total">0</span> Gs.</div>
+        <h2 style="text-align:right">Total: <span id="gran-total">0</span> Gs.</h2>
         <button onclick="finalizarVenta()" style="background:#27ae60; font-size:20px;">REGISTRAR VENTA</button>
+    </div>
+
+    <div id="reporte-screen" class="card full-screen hidden">
+        <button onclick="mostrarSeccion('menu-screen')" style="width:auto; background:#7f8c8d;">← Volver</button>
+        <h3>Historial de Ventas</h3>
+        <div class="section" style="background:#2c3e50; color:white; text-align:center;">
+            <h2 style="margin:0">Acumulado: <span id="total-ventas-valor">0</span> Gs.</h2>
+        </div>
+        <div class="table-wrapper">
+            <table>
+                <thead><tr><th>Fecha</th><th>Cliente</th><th>Total</th><th>Acción</th></tr></thead>
+                <tbody id="lista-ventas-body"></tbody>
+            </table>
+        </div>
     </div>
 
     <script>
         let carrito = [];
-        let clienteActual = {nombre: "Consumidor Final", ruc: "0"};
-        let editandoId = null; // Variable para saber si estamos editando
+        let clienteActual = {nombre: "Consumidor Final"};
+        let editandoId = null;
 
         function mostrarSeccion(id) {
-            document.getElementById('login-screen').classList.add('hidden');
-            document.getElementById('menu-screen').classList.add('hidden');
-            document.getElementById('prod-screen').classList.add('hidden');
-            document.getElementById('venta-screen').classList.add('hidden');
+            document.querySelectorAll('.card').forEach(c => c.classList.add('hidden'));
             document.getElementById(id).classList.remove('hidden');
-            document.body.style.alignItems = (id.includes('screen') && id !== 'login-screen' && id !== 'menu-screen') ? "flex-start" : "center";
+            document.body.style.alignItems = (id === 'login-screen' || id === 'menu-screen') ? "center" : "flex-start";
         }
 
         async function ejecutarLogin() {
             const u = document.getElementById('user').value;
             const p = document.getElementById('pass').value;
-            const res = await fetch('/login', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({nombre_usuario: u, contrasena: p})
-            });
-            const data = await res.json();
-            if(data.success) mostrarSeccion('menu-screen');
-            else document.getElementById('msg-error').innerText = "Credenciales incorrectas";
+            try {
+                const res = await fetch('/login', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({nombre_usuario: u, contrasena: p})
+                });
+                const data = await res.json();
+                if(data.success) mostrarSeccion('menu-screen');
+                else document.getElementById('msg-error').innerText = "Acceso Denegado";
+            } catch(e) { alert("Error de servidor"); }
         }
-<thead>
-    <tr>
-        <th>Foto</th>
-        <th>Cód</th>
-        <th>Nombre</th>
-        <th>Precio</th>
-        <th>Stock</th>
-        <th>Acción</th> </tr>
-</thead>
-        // --- PRODUCTOS ---
+
+        // PRODUCTOS
         function abrirProductos() { mostrarSeccion('prod-screen'); listarProductos(); }
         async function listarProductos() {
             const res = await fetch('/productos');
             const data = await res.json();
             let html = '';
             data.forEach(p => {
-                html += `<tr>
-                    <td><img src="${p.imagen_url || ''}" class="img-tabla" onerror="this.src='https://via.placeholder.com/50'"></td>
-                    <td>${p.codigo || ''}</td>
-                    <td>${p.nombre}</td>
-                    <td>${Number(p.precio).toLocaleString()}</td>
-                    <td>${p.stock}</td>
-                    <td>
-                        <div style="display: flex; gap: 5px;">
-                            <button onclick='prepararEdicion(${JSON.stringify(p)})' style="background:#f39c12; width:auto; padding:5px 10px; font-size:12px;">Editar</button>
-                            <button onclick="eliminarProducto(${p.id})" style="background:#e74c3c; width:auto; padding:5px 10px; font-size:12px;">Eliminar</button>
-                        </div>
-                    </td>
-                </tr>`;
+                html += `<tr><td><img src="${p.imagen_url || ''}" class="img-tabla" onerror="this.src='https://via.placeholder.com/50'"></td>
+                <td>${p.codigo || ''}</td><td>${p.nombre}</td><td>${Number(p.precio).toLocaleString()}</td><td>${p.stock}</td>
+                <td><button onclick='prepararEdicion(${JSON.stringify(p)})' style="background:#f39c12;width:auto;padding:5px">E</button>
+                <button onclick="eliminarProducto(${p.id})" style="background:#e74c3c;width:auto;padding:5px">X</button></td></tr>`;
             });
             document.getElementById('lista-prod-body').innerHTML = html;
         }
 
         function prepararEdicion(p) {
-            editandoId = p.id; // Guardamos el ID del producto que vamos a editar
+            editandoId = p.id;
             document.getElementById('p-cod').value = p.codigo;
             document.getElementById('p-nom').value = p.nombre;
             document.getElementById('p-pre').value = p.precio;
             document.getElementById('p-stock').value = p.stock;
             document.getElementById('p-img').value = p.imagen_url;
-            
-            // Cambiamos el color del botón para avisar que estamos editando
-            const btn = document.querySelector("#prod-screen button[onclick='guardarProducto()']");
-            btn.innerText = "ACTUALIZAR PRODUCTO";
-            btn.style.background = "#f39c12";
-            window.scrollTo(0,0); // Sube la pantalla para ver los cuadros
+            document.getElementById('btn-guardar-prod').innerText = "ACTUALIZAR";
+            document.getElementById('btn-guardar-prod').style.background = "#f39c12";
         }
 
         async function guardarProducto() {
-            const prod = {
-                id: editandoId, // Si es null, el servidor crea uno nuevo. Si tiene ID, lo actualiza.
-                codigo: document.getElementById('p-cod').value,
-                nombre: document.getElementById('p-nom').value,
-                precio: document.getElementById('p-pre').value,
-                stock: document.getElementById('p-stock').value,
-                imagen_url: document.getElementById('p-img').value
-            };
-async function eliminarProducto(id) {
-            if (!confirm("¿Estás seguro de que deseas eliminar este producto? Esta acción no se puede deshacer.")) {
-                return;
-            }
-
-            try {
-                const res = await fetch(`/eliminar-producto/${id}`, {
-                    method: 'DELETE'
-                });
-
-                if (res.ok) {
-                    alert("Producto eliminado correctamente");
-                    listarProductos(); // Recargamos la lista
-                } else {
-                    alert("Error al eliminar el producto");
-                }
-            } catch (error) {
-                console.error("Error:", error);
-                alert("Hubo un error de conexión");
-            }
+            const prod = { id: editandoId, codigo: document.getElementById('p-cod').value, nombre: document.getElementById('p-nom').value, 
+                           precio: document.getElementById('p-pre').value, stock: document.getElementById('p-stock').value, imagen_url: document.getElementById('p-img').value };
+            await fetch('/guardar-producto', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(prod) });
+            alert("Operación Exitosa");
+            location.reload(); 
         }
-            const res = await fetch('/guardar-producto', {
-                method: 'POST', 
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify(prod)
-            });
 
-            if(res.ok) { 
-                alert(editandoId ? "Producto Actualizado" : "Producto Guardado"); 
-                limpiarFormularioProd();
-                listarProductos(); 
+        async function eliminarProducto(id) {
+            if(confirm("¿Borrar producto?")) {
+                await fetch(`/eliminar-producto/${id}`, { method: 'DELETE' });
+                listarProductos();
             }
         }
 
-        function limpiarFormularioProd() {
-            editandoId = null;
-            document.getElementById('p-cod').value=''; 
-            document.getElementById('p-nom').value=''; 
-            document.getElementById('p-pre').value=''; 
-            document.getElementById('p-stock').value=''; 
-            document.getElementById('p-img').value='';
-            const btn = document.querySelector("#prod-screen button[onclick='guardarProducto()']");
-            btn.innerText = "GUARDAR PRODUCTO";
-            btn.style.background = "#27ae60";
-        }
-
-        // --- VENTAS ---
-        function abrirVentas() { mostrarSeccion('venta-screen'); renderizarTabla(); }
+        // VENTAS
+        function abrirVentas() { mostrarSeccion('venta-screen'); }
         async function buscarProducto() {
             const term = document.getElementById('busc-producto').value;
-            if(term.length < 1) { document.getElementById('lista-productos').innerHTML = ''; return; }
+            if(term.length < 1) return;
             const res = await fetch(`/buscar-producto?term=${term}`);
             const data = await res.json();
             let html = '';
-            data.forEach(p => {
-                html += `<div class="sugerencia-item" onclick="agregarAlCarrito(${p.id}, '${p.nombre}', ${p.precio}, '${p.imagen_url}')">
-                    <img src="${p.imagen_url || ''}" style="width:30px;height:30px;object-fit:cover"> ${p.nombre} - ${p.precio} Gs.
-                </div>`;
-            });
+            data.forEach(p => html += `<div class="sugerencia-item" onclick="agregarAlCarrito(${p.id}, '${p.nombre}', ${p.precio}, '${p.imagen_url}')">${p.nombre}</div>`);
             document.getElementById('lista-productos').innerHTML = html;
         }
 
         function agregarAlCarrito(id, nombre, precio, img) {
-            const existe = carrito.find(i => i.id === id);
-            if(existe) existe.cantidad++;
-            else carrito.push({id, nombre, precio, imagen_url: img, cantidad: 1});
+            const ex = carrito.find(i => i.id === id);
+            if(ex) ex.cantidad++; else carrito.push({id, nombre, precio, imagen_url: img, cantidad: 1});
             document.getElementById('lista-productos').innerHTML = '';
             document.getElementById('busc-producto').value = '';
             renderizarTabla();
@@ -253,39 +191,45 @@ async function eliminarProducto(id) {
 
         function renderizarTabla() {
             let html = ''; let total = 0;
-            carrito.forEach((p, index) => {
+            carrito.forEach((p, i) => {
                 let sub = p.precio * p.cantidad; total += sub;
                 html += `<tr><td><img src="${p.imagen_url}" class="img-tabla"></td><td>${p.nombre}</td><td>${Number(p.precio).toLocaleString()}</td>
-                <td><input type="number" value="${p.cantidad}" style="width:60px;margin:0" onchange="carrito[${index}].cantidad=this.value;renderizarTabla()"></td>
-                <td>${sub.toLocaleString()}</td><td><button onclick="carrito.splice(${index},1);renderizarTabla()" style="background:red;width:auto;padding:5px 10px">X</button></td></tr>`;
+                <td><input type="number" value="${p.cantidad}" style="width:50px" onchange="carrito[${i}].cantidad=this.value;renderizarTabla()"></td>
+                <td>${sub.toLocaleString()}</td><td><button onclick="carrito.splice(${i},1);renderizarTabla()" style="background:red">X</button></td></tr>`;
             });
             document.getElementById('tabla-venta').innerHTML = html;
             document.getElementById('gran-total').innerText = total.toLocaleString();
         }
 
         async function finalizarVenta() {
-            if(carrito.length === 0) return alert("Carrito vacío");
-            const res = await fetch('/finalizar-venta', {
-                method: 'POST', headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({cliente: clienteActual.nombre, carrito, total: parseInt(document.getElementById('gran-total').innerText.replace(/\./g, ''))})
+            const t = parseInt(document.getElementById('gran-total').innerText.replace(/\./g, ''));
+            await fetch('/finalizar-venta', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({cliente: clienteActual.nombre, carrito, total: t})});
+            alert("Venta Registrada");
+            location.reload();
+        }
+
+        // REPORTES
+        async function abrirReportes() {
+            mostrarSeccion('reporte-screen');
+            const res = await fetch('/historial-ventas');
+            const data = await res.json();
+            let html = ''; let suma = 0;
+            data.forEach(v => {
+                suma += parseInt(v.total);
+                html += `<tr><td>${new Date(v.fecha).toLocaleDateString()}</td><td>${v.cliente}</td><td>${Number(v.total).toLocaleString()}</td>
+                <td><button onclick="alert('Venta ID: '+${v.id})" style="padding:5px">Ver</button></td></tr>`;
             });
-            if(res.ok) { alert("¡Venta Exitosa! Stock actualizado."); carrito = []; renderizarTabla(); }
+            document.getElementById('lista-ventas-body').innerHTML = html;
+            document.getElementById('total-ventas-valor').innerText = suma.toLocaleString();
         }
 
         async function buscarCliente() {
             const term = document.getElementById('busc-cliente').value;
-            if(term.length < 1) { document.getElementById('lista-clientes').innerHTML = ''; return; }
             const res = await fetch(`/buscar-cliente?term=${term}`);
             const data = await res.json();
             let html = '';
-            data.forEach(c => html += `<div class="sugerencia-item" onclick="seleccionarCliente('${c.nombre}')">${c.nombre}</div>`);
+            data.forEach(c => html += `<div class="sugerencia-item" onclick="clienteActual.nombre='${c.nombre}'; document.getElementById('cliente-seleccionado').innerHTML='Cliente: <b>${c.nombre}</b>'; document.getElementById('lista-clientes').innerHTML=''">${c.nombre}</div>`);
             document.getElementById('lista-clientes').innerHTML = html;
-        }
-        function seleccionarCliente(nombre) {
-            clienteActual.nombre = nombre;
-            document.getElementById('cliente-seleccionado').innerHTML = `Cliente: <b>${nombre}</b>`;
-            document.getElementById('lista-clientes').innerHTML = '';
-            document.getElementById('busc-cliente').value = '';
         }
     </script>
 </body>
