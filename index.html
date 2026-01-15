@@ -5,115 +5,136 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sistema Ovelar</title>
     <style>
-        body { font-family: sans-serif; background: #1e3c72; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 10px; box-sizing: border-box; }
-        .card { background: white; padding: 25px; border-radius: 12px; width: 100%; max-width: 400px; text-align: center; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', sans-serif; background: #1e3c72; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 10px; box-sizing: border-box; color: #333; }
+        .card { background: white; padding: 25px; border-radius: 12px; width: 100%; max-width: 400px; text-align: center; box-sizing: border-box; box-shadow: 0 10px 20px rgba(0,0,0,0.2); }
         .hidden { display: none; }
+        .full-screen { max-width: 950px; text-align: left; }
+        
         input { padding: 12px; width: 100%; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; font-size: 16px; }
-        button { padding: 12px; background: #3498db; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; width: 100%; }
-        .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 20px; }
-        .menu-item { background: #f1f1f1; padding: 20px; border-radius: 10px; cursor: pointer; border: 1px solid #ddd; }
-        .full-screen { max-width: 900px; text-align: left; }
-        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        button { padding: 12px; background: #3498db; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; width: 100%; margin-bottom: 5px; }
+        button:hover { background: #2980b9; }
+
+        .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px; }
+        .menu-item { background: #f8f9fa; padding: 20px; border-radius: 10px; cursor: pointer; border: 1px solid #eee; text-align: center; font-weight: bold; }
+        .menu-item:hover { background: #ebf5fb; border-color: #3498db; }
+
+        .section { background: #f9f9f9; padding: 15px; border-radius: 8px; margin-bottom: 15px; border-left: 5px solid #3498db; position: relative; }
+        .table-wrapper { overflow-x: auto; width: 100%; background: white; border-radius: 8px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
         th, td { padding: 10px; border: 1px solid #eee; text-align: left; }
         th { background: #34495e; color: white; }
-        .img-tabla { width: 50px; height: 50px; object-fit: cover; }
+        .img-tabla { width: 45px; height: 45px; object-fit: cover; border-radius: 5px; }
+
+        .sugerencias { border: 1px solid #ddd; background: white; position: absolute; width: calc(100% - 30px); z-index: 100; max-height: 150px; overflow-y: auto; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+        .sugerencia-item { padding: 10px; cursor: pointer; border-bottom: 1px solid #eee; display: flex; align-items: center; gap: 10px; }
+        .sugerencia-item:hover { background: #ebf5fb; }
+        .total-container { text-align: right; font-size: 26px; font-weight: bold; margin-top: 15px; color: #2c3e50; }
     </style>
 </head>
 <body>
 
     <div id="login-screen" class="card">
-        <h2>SISTEMA OVELAR</h2>
+        <h2 style="color:#1e3c72">SISTEMA OVELAR</h2>
         <input type="text" id="user" placeholder="Usuario">
         <input type="password" id="pass" placeholder="Contraseña">
         <button onclick="ejecutarLogin()">INGRESAR</button>
-        <p id="msg-error" style="color:red;"></p>
+        <p id="msg-error" style="color:red; font-size: 14px;"></p>
     </div>
 
     <div id="menu-screen" class="card hidden" style="max-width: 500px;">
-        <h2>Menú Principal</h2>
+        <h2>Panel de Control</h2>
         <div class="menu-grid">
-            <div class="menu-item" onclick="mostrarSeccion('venta-screen')">🛒 VENTAS</div>
+            <div class="menu-item" onclick="abrirVentas()">🛒 VENTAS</div>
             <div class="menu-item" onclick="abrirProductos()">📦 PRODUCTOS</div>
         </div>
-        <br><button onclick="location.reload()" style="background:#7f8c8d">Cerrar Sesión</button>
+        <br><button onclick="location.reload()" style="background:#95a5a6">Cerrar Sesión</button>
     </div>
 
     <div id="prod-screen" class="card full-screen hidden">
-        <button onclick="mostrarSeccion('menu-screen')" style="width:auto;">← Volver</button>
+        <button onclick="mostrarSeccion('menu-screen')" style="width:auto; background:#7f8c8d;">← Volver</button>
         <h3>Gestión de Inventario</h3>
-        <div style="background:#f9f9f9; padding:15px; border-radius:8px;">
-            <input type="text" id="p-cod" placeholder="Código">
-            <input type="text" id="p-nom" placeholder="Nombre del Producto">
-            <input type="number" id="p-pre" placeholder="Precio Gs.">
-            <input type="number" id="p-stock" placeholder="Stock">
+        <div class="section">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                <input type="text" id="p-cod" placeholder="Código">
+                <input type="text" id="p-nom" placeholder="Nombre">
+                <input type="number" id="p-pre" placeholder="Precio Gs.">
+                <input type="number" id="p-stock" placeholder="Stock">
+            </div>
             <input type="text" id="p-img" placeholder="Link de Foto (URL)">
-            <button onclick="guardarProducto()" style="background:#27ae60">GUARDAR</button>
+            <button onclick="guardarProducto()" style="background:#27ae60">GUARDAR PRODUCTO</button>
         </div>
-        <table>
-            <thead><tr><th>Foto</th><th>Cód</th><th>Nombre</th><th>Precio</th><th>Stock</th></tr></thead>
-            <tbody id="lista-prod-body"></tbody>
-        </table>
+        <div class="table-wrapper">
+            <table>
+                <thead><tr><th>Foto</th><th>Cód</th><th>Nombre</th><th>Precio</th><th>Stock</th></tr></thead>
+                <tbody id="lista-prod-body"></tbody>
+            </table>
+        </div>
     </div>
 
     <div id="venta-screen" class="card full-screen hidden">
-        <button onclick="mostrarSeccion('menu-screen')" style="width:auto;">← Volver</button>
+        <button onclick="mostrarSeccion('menu-screen')" style="width:auto; background:#7f8c8d;">← Volver</button>
         <h3>Módulo de Ventas</h3>
-        <p>Busca productos para vender...</p>
+        <div style="display: flex; flex-wrap: wrap; gap: 15px;">
+            <div class="section" style="flex: 1; min-width: 250px;">
+                <label><strong>Cliente:</strong></label>
+                <input type="text" id="busc-cliente" placeholder="Buscar cliente..." onkeyup="buscarCliente()">
+                <div id="lista-clientes" class="sugerencias"></div>
+                <p id="cliente-seleccionado">Cliente: <b>Consumidor Final</b></p>
+            </div>
+            <div class="section" style="flex: 1; min-width: 250px;">
+                <label><strong>Producto:</strong></label>
+                <input type="text" id="busc-producto" placeholder="Nombre o Código..." onkeyup="buscarProducto()">
+                <div id="lista-productos" class="sugerencias"></div>
+            </div>
+        </div>
+        <div class="table-wrapper">
+            <table>
+                <thead><tr><th>Foto</th><th>Producto</th><th>Precio</th><th>Cant.</th><th>Subtotal</th><th></th></tr></thead>
+                <tbody id="tabla-venta"></tbody>
+            </table>
+        </div>
+        <div class="total-container">Total: <span id="gran-total">0</span> Gs.</div>
+        <button onclick="finalizarVenta()" style="background:#27ae60; font-size:20px;">REGISTRAR VENTA</button>
     </div>
 
     <script>
+        let carrito = [];
+        let clienteActual = {nombre: "Consumidor Final", ruc: "0"};
+
         function mostrarSeccion(id) {
             document.getElementById('login-screen').classList.add('hidden');
             document.getElementById('menu-screen').classList.add('hidden');
             document.getElementById('prod-screen').classList.add('hidden');
             document.getElementById('venta-screen').classList.add('hidden');
             document.getElementById(id).classList.remove('hidden');
+            document.body.style.alignItems = (id.includes('screen') && id !== 'login-screen' && id !== 'menu-screen') ? "flex-start" : "center";
         }
 
         async function ejecutarLogin() {
             const u = document.getElementById('user').value;
             const p = document.getElementById('pass').value;
-            const msg = document.getElementById('msg-error');
-            
-            msg.innerText = "Verificando...";
-
-            try {
-                const response = await fetch('/login', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({nombre_usuario: u, contrasena: p})
-                });
-                const data = await response.json();
-                
-                if(data.success) {
-                    mostrarSeccion('menu-screen');
-                } else {
-                    msg.innerText = "Usuario o clave incorrectos";
-                }
-            } catch (err) {
-                msg.innerText = "Error de conexión con el servidor";
-                console.error(err);
-            }
+            const res = await fetch('/login', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({nombre_usuario: u, contrasena: p})
+            });
+            const data = await res.json();
+            if(data.success) mostrarSeccion('menu-screen');
+            else document.getElementById('msg-error').innerText = "Credenciales incorrectas";
         }
 
-        async function abrirProductos() {
-            mostrarSeccion('prod-screen');
-            listarProductos();
-        }
-
+        // --- PRODUCTOS ---
+        function abrirProductos() { mostrarSeccion('prod-screen'); listarProductos(); }
         async function listarProductos() {
             const res = await fetch('/productos');
             const data = await res.json();
             let html = '';
             data.forEach(p => {
-                html += `<tr>
-                    <td><img src="${p.imagen_url || ''}" class="img-tabla" onerror="this.src='https://via.placeholder.com/50'"></td>
-                    <td>${p.codigo}</td><td>${p.nombre}</td><td>${Number(p.precio).toLocaleString()}</td><td>${p.stock}</td>
-                </tr>`;
+                html += `<tr><td><img src="${p.imagen_url || ''}" class="img-tabla" onerror="this.src='https://via.placeholder.com/50'"></td>
+                <td>${p.codigo || ''}</td><td>${p.nombre}</td><td>${Number(p.precio).toLocaleString()}</td><td>${p.stock}</td></tr>`;
             });
             document.getElementById('lista-prod-body').innerHTML = html;
         }
-
         async function guardarProducto() {
             const prod = {
                 codigo: document.getElementById('p-cod').value,
@@ -123,14 +144,78 @@
                 imagen_url: document.getElementById('p-img').value
             };
             const res = await fetch('/guardar-producto', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
+                method: 'POST', headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify(prod)
             });
-            if(res.ok) {
-                alert("Guardado");
-                listarProductos();
+            if(res.ok) { 
+                alert("Guardado"); 
+                document.getElementById('p-cod').value=''; document.getElementById('p-nom').value=''; 
+                document.getElementById('p-pre').value=''; document.getElementById('p-stock').value=''; 
+                document.getElementById('p-img').value='';
+                listarProductos(); 
             }
+        }
+
+        // --- VENTAS ---
+        function abrirVentas() { mostrarSeccion('venta-screen'); renderizarTabla(); }
+        async function buscarProducto() {
+            const term = document.getElementById('busc-producto').value;
+            if(term.length < 1) { document.getElementById('lista-productos').innerHTML = ''; return; }
+            const res = await fetch(`/buscar-producto?term=${term}`);
+            const data = await res.json();
+            let html = '';
+            data.forEach(p => {
+                html += `<div class="sugerencia-item" onclick="agregarAlCarrito(${p.id}, '${p.nombre}', ${p.precio}, '${p.imagen_url}')">
+                    <img src="${p.imagen_url || ''}" style="width:30px;height:30px;object-fit:cover"> ${p.nombre} - ${p.precio} Gs.
+                </div>`;
+            });
+            document.getElementById('lista-productos').innerHTML = html;
+        }
+
+        function agregarAlCarrito(id, nombre, precio, img) {
+            const existe = carrito.find(i => i.id === id);
+            if(existe) existe.cantidad++;
+            else carrito.push({id, nombre, precio, imagen_url: img, cantidad: 1});
+            document.getElementById('lista-productos').innerHTML = '';
+            document.getElementById('busc-producto').value = '';
+            renderizarTabla();
+        }
+
+        function renderizarTabla() {
+            let html = ''; let total = 0;
+            carrito.forEach((p, index) => {
+                let sub = p.precio * p.cantidad; total += sub;
+                html += `<tr><td><img src="${p.imagen_url}" class="img-tabla"></td><td>${p.nombre}</td><td>${Number(p.precio).toLocaleString()}</td>
+                <td><input type="number" value="${p.cantidad}" style="width:60px;margin:0" onchange="carrito[${index}].cantidad=this.value;renderizarTabla()"></td>
+                <td>${sub.toLocaleString()}</td><td><button onclick="carrito.splice(${index},1);renderizarTabla()" style="background:red;width:auto;padding:5px 10px">X</button></td></tr>`;
+            });
+            document.getElementById('tabla-venta').innerHTML = html;
+            document.getElementById('gran-total').innerText = total.toLocaleString();
+        }
+
+        async function finalizarVenta() {
+            if(carrito.length === 0) return alert("Carrito vacío");
+            const res = await fetch('/finalizar-venta', {
+                method: 'POST', headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({cliente: clienteActual.nombre, carrito, total: parseInt(document.getElementById('gran-total').innerText.replace(/\./g, ''))})
+            });
+            if(res.ok) { alert("¡Venta Exitosa! Stock actualizado."); carrito = []; renderizarTabla(); }
+        }
+
+        async function buscarCliente() {
+            const term = document.getElementById('busc-cliente').value;
+            if(term.length < 1) { document.getElementById('lista-clientes').innerHTML = ''; return; }
+            const res = await fetch(`/buscar-cliente?term=${term}`);
+            const data = await res.json();
+            let html = '';
+            data.forEach(c => html += `<div class="sugerencia-item" onclick="seleccionarCliente('${c.nombre}')">${c.nombre}</div>`);
+            document.getElementById('lista-clientes').innerHTML = html;
+        }
+        function seleccionarCliente(nombre) {
+            clienteActual.nombre = nombre;
+            document.getElementById('cliente-seleccionado').innerHTML = `Cliente: <b>${nombre}</b>`;
+            document.getElementById('lista-clientes').innerHTML = '';
+            document.getElementById('busc-cliente').value = '';
         }
     </script>
 </body>
