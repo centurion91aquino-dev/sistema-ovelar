@@ -4,7 +4,6 @@ const path = require('path');
 const app = express();
 const port = process.env.PORT || 3000;
 
-// Configuración de conexión (Transaction Pooler)
 const connectionString = 'postgresql://postgres.zvnzvwakatydltdsfggs:Ovelar26202026@aws-1-sa-east-1.pooler.supabase.com:6543/postgres?pgbouncer=true';
 
 const pool = new Pool({
@@ -15,58 +14,51 @@ const pool = new Pool({
 app.use(express.json());
 app.use(express.static(__dirname));
 
-// --- RUTAS DEL SISTEMA ---
+// --- RUTAS ---
 
-// 1. Login
 app.post('/login', async (req, res) => {
     const { nombre_usuario, contrasena } = req.body;
     try {
-        const result = await pool.query(
-            'SELECT * FROM usuarios WHERE nombre_usuario = $1 AND contrasena = $2',
-            [nombre_usuario, contrasena]
-        );
-        if (result.rows.length > 0) {
-            res.json({ success: true });
-        } else {
-            res.json({ success: false, message: 'Usuario o clave incorrecta' });
-        }
-    } catch (err) {
-        res.status(500).json({ success: false, message: err.message });
-    }
+        const result = await pool.query('SELECT * FROM usuarios WHERE nombre_usuario = $1 AND contrasena = $2', [nombre_usuario, contrasena]);
+        res.json({ success: result.rows.length > 0 });
+    } catch (err) { res.status(500).json({ success: false }); }
 });
 
-// 2. Buscador de Productos (Busca por nombre o código)
+// LISTAR TODOS LOS PRODUCTOS
+app.get('/productos', async (req, res) => {
+    try {
+        const result = await pool.query('SELECT * FROM productos ORDER BY nombre ASC');
+        res.json(result.rows);
+    } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// GUARDAR O ACTUALIZAR PRODUCTO
+app.post('/guardar-producto', async (req, res) => {
+    const { codigo, nombre, precio, stock } = req.body;
+    try {
+        await pool.query(
+            `INSERT INTO productos (codigo, nombre, precio, stock) 
+             VALUES ($1, $2, $3, $4) 
+             ON CONFLICT (codigo) DO UPDATE 
+             SET nombre = EXCLUDED.nombre, precio = EXCLUDED.precio, stock = EXCLUDED.stock`,
+            [codigo, nombre, precio, stock]
+        );
+        res.json({ success: true });
+    } catch (err) { res.status(500).json({ success: false, error: err.message }); }
+});
+
 app.get('/buscar-producto', async (req, res) => {
     const term = req.query.term;
-    try {
-        const result = await pool.query(
-            "SELECT * FROM productos WHERE nombre ILIKE $1 OR codigo ILIKE $1 LIMIT 5",
-            [`%${term}%`]
-        );
-        res.json(result.rows);
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
+    const result = await pool.query("SELECT * FROM productos WHERE nombre ILIKE $1 OR codigo ILIKE $1 LIMIT 5", [`%${term}%`]);
+    res.json(result.rows);
 });
 
-// 3. Buscador de Clientes (Busca por nombre o RUC)
 app.get('/buscar-cliente', async (req, res) => {
     const term = req.query.term;
-    try {
-        const result = await pool.query(
-            "SELECT * FROM clientes WHERE nombre ILIKE $1 OR ruc_cedula ILIKE $1 LIMIT 5",
-            [`%${term}%`]
-        );
-        res.json(result.rows);
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
+    const result = await pool.query("SELECT * FROM clientes WHERE nombre ILIKE $1 OR ruc_cedula ILIKE $1 LIMIT 5", [`%${term}%`]);
+    res.json(result.rows);
 });
 
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'index.html'));
-});
+app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'index.html')));
 
-app.listen(port, '0.0.0.0', () => {
-    console.log(`🚀 SERVIDOR VENTAS ONLINE EN PUERTO ${port}`);
-});
+app.listen(port, '0.0.0.0', () => console.log(`🚀 SISTEMA OVELAR V2 EN MARCHA`));
