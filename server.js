@@ -40,7 +40,16 @@ app.post('/guardar-producto', async (req, res) => {
         res.json({ success: true });
     } catch (err) { res.status(500).json({ success: false }); }
 });
-
+app.delete('/eliminar-producto/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        await pool.query('DELETE FROM productos WHERE id = $1', [id]);
+        res.sendStatus(200);
+    } catch (err) {
+        console.error(err);
+        res.status(500).send("Error del servidor");
+    }
+});
 // FINALIZAR VENTA Y RESTAR STOCK
 app.post('/finalizar-venta', async (req, res) => {
     const { cliente, carrito, total } = req.body;
@@ -81,4 +90,5 @@ app.get('/buscar-cliente', async (req, res) => {
 app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'index.html')));
 
 app.listen(port, '0.0.0.0', () => console.log(`🚀 SISTEMA OVELAR V2 EN MARCHA`));
+
 
