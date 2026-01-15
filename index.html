@@ -130,7 +130,10 @@
         }
 
         // PRODUCTOS
-        function abrirProductos() { mostrarSeccion('prod-screen'); listarProductos(); }
+       function abrirProductos() { 
+    mostrarSeccion('prod-screen'); 
+    listarProductos(); 
+}
         async function listarProductos() {
             const res = await fetch('/productos');
             const data = await res.json();
@@ -163,11 +166,45 @@
             location.reload(); 
         }
 
-        async function eliminarProducto(id) {
-            if(confirm("¿Borrar producto?")) {
-                await fetch(`/eliminar-producto/${id}`, { method: 'DELETE' });
-                listarProductos();
-            }
+       async function listarProductos() {
+    console.log("Intentando cargar productos...");
+    try {
+        const res = await fetch('/productos');
+        const data = await res.json();
+        console.log("Datos recibidos:", data); // Esto te dirá en la consola si hay datos
+
+        const tablaProd = document.getElementById('lista-prod-body');
+        if (!tablaProd) return;
+
+        let html = '';
+        if (data.length === 0) {
+            html = '<tr><td colspan="6" style="text-align:center;">No hay productos registrados aún.</td></tr>';
+        } else {
+            data.forEach(p => {
+                // Convertimos el objeto a texto para el botón editar
+                const productoJson = JSON.stringify(p).replace(/'/g, "&apos;");
+                
+                html += `<tr>
+                    <td><img src="${p.imagen_url || ''}" class="img-tabla" onerror="this.src='https://via.placeholder.com/50'"></td>
+                    <td>${p.codigo || '---'}</td>
+                    <td>${p.nombre}</td>
+                    <td>${Number(p.precio).toLocaleString()}</td>
+                    <td>${p.stock}</td>
+                    <td>
+                        <div style="display:flex; gap:5px;">
+                            <button onclick='prepararEdicion(${productoJson})' style="background:#f39c12;width:auto;padding:5px 10px;font-size:12px;">Editar</button>
+                            <button onclick="eliminarProducto(${p.id})" style="background:#e74c3c;width:auto;padding:5px 10px;font-size:12px;">Eliminar</button>
+                        </div>
+                    </td>
+                </tr>`;
+            });
+        }
+        tablaProd.innerHTML = html;
+    } catch (e) {
+        console.error("Error al listar productos:", e);
+        alert("Error al conectar con la base de datos de productos");
+    }
+}
         }
 
         // VENTAS
