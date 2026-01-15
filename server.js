@@ -40,15 +40,28 @@ app.post('/guardar-producto', async (req, res) => {
         res.json({ success: true });
     } catch (err) { res.status(500).json({ success: false }); }
 });
+// 1. RUTA PARA LISTAR PRODUCTOS (¡Esta es la que hace que la lista se vea!)
+app.get('/productos', async (req, res) => {
+    try {
+        const result = await pool.query('SELECT * FROM productos ORDER BY id DESC');
+        res.json(result.rows);
+    } catch (err) {
+        console.error("Error en GET /productos:", err);
+        res.status(500).send("Error del servidor");
+    }
+});
+
+// 2. RUTA PARA ELIMINAR PRODUCTOS
 app.delete('/eliminar-producto/:id', async (req, res) => {
     try {
         const { id } = req.params;
         await pool.query('DELETE FROM productos WHERE id = $1', [id]);
         res.sendStatus(200);
     } catch (err) {
-        console.error(err);
+        console.error("Error en DELETE /eliminar-producto:", err);
         res.status(500).send("Error del servidor");
     }
+});
 });
 // FINALIZAR VENTA Y RESTAR STOCK
 app.post('/finalizar-venta', async (req, res) => {
@@ -75,6 +88,7 @@ app.post('/finalizar-venta', async (req, res) => {
         res.status(500).json({ success: false, error: err.message });
     } finally { client.release(); }
 });
+
 app.get('/buscar-producto', async (req, res) => {
     const term = req.query.term;
     const result = await pool.query("SELECT * FROM productos WHERE nombre ILIKE $1 OR codigo ILIKE $1 LIMIT 5", [`%${term}%`]);
@@ -90,5 +104,6 @@ app.get('/buscar-cliente', async (req, res) => {
 app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'index.html')));
 
 app.listen(port, '0.0.0.0', () => console.log(`🚀 SISTEMA OVELAR V2 EN MARCHA`));
+
 
 
