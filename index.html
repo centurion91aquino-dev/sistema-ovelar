@@ -3,70 +3,115 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema Ovelar</title>
+    <title>Sistema Ovelar - Gestión Completa</title>
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+        body { font-family: 'Segoe UI', sans-serif; background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; color: #333; }
         .card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.3); width: 100%; max-width: 400px; text-align: center; }
+        .full-screen { max-width: 950px; text-align: left; transition: 0.3s; }
         .hidden { display: none; }
-        .menu-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-top: 20px; }
-        .menu-item { background: #f8f9fa; padding: 15px; border-radius: 10px; cursor: pointer; border: 1px solid #eee; transition: 0.2s; }
-        .menu-item:hover { background: #ebf5fb; transform: translateY(-3px); }
-        .menu-item i { font-size: 30px; display: block; }
         
-        .full-screen { max-width: 900px; text-align: left; }
-        input { padding: 10px; width: 100%; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 5px; box-sizing: border-box; }
-        button { padding: 10px; background: #3498db; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        /* MENU */
+        .menu-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-top: 20px; }
+        .menu-item { background: #f8f9fa; padding: 20px; border-radius: 10px; cursor: pointer; border: 1px solid #eee; transition: 0.2s; }
+        .menu-item:hover { background: #ebf5fb; transform: translateY(-3px); border-color: #3498db; }
+        .menu-item i { font-size: 35px; display: block; margin-bottom: 5px; }
+
+        /* FORMULARIOS Y TABLAS */
+        .section { background: #f9f9f9; padding: 15px; border-radius: 8px; margin-bottom: 15px; border-left: 5px solid #3498db; position: relative; }
+        input { padding: 12px; width: 100%; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; }
+        button { padding: 12px; background: #3498db; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; }
+        button:hover { background: #2980b9; }
+        
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; background: white; }
         th, td { padding: 10px; border: 1px solid #eee; text-align: left; }
         th { background: #34495e; color: white; }
+        
+        .img-tabla { width: 50px; height: 50px; object-fit: cover; border-radius: 5px; background: #eee; }
+        .sugerencias { border: 1px solid #ddd; background: white; position: absolute; width: calc(100% - 30px); z-index: 100; max-height: 150px; overflow-y: auto; }
+        .sugerencia-item { padding: 10px; cursor: pointer; border-bottom: 1px solid #eee; display: flex; align-items: center; gap: 10px; }
+        .sugerencia-item:hover { background: #ebf5fb; }
+        .total-container { text-align: right; font-size: 26px; font-weight: bold; margin-top: 20px; color: #2c3e50; }
     </style>
     <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
 </head>
 <body>
 
     <div id="login-screen" class="card">
-        <h2>Sistema Ovelar</h2>
+        <h2 style="color:#1e3c72">SISTEMA OVELAR</h2>
         <input type="text" id="user" placeholder="Usuario">
         <input type="password" id="pass" placeholder="Contraseña">
-        <button onclick="login()" style="width:100%">Entrar</button>
+        <button onclick="login()" style="width:100%">INICIAR SESIÓN</button>
+        <p id="msg-error" style="color:red; font-size: 14px;"></p>
     </div>
 
     <div id="menu-screen" class="card hidden" style="max-width: 500px;">
-        <h2>Menú Principal</h2>
+        <h2>Panel Principal</h2>
         <div class="menu-grid">
-            <div class="menu-item" onclick="abrirVentas()">
+            <div class="menu-item" onclick="mostrarSeccion('venta-screen'); renderizarTabla();">
                 <i class="material-icons" style="color: #27ae60;">shopping_cart</i><span>VENTAS</span>
             </div>
-            <div class="menu-item" onclick="abrirProductos()">
+            <div class="menu-item" onclick="mostrarSeccion('prod-screen'); listarProductos();">
                 <i class="material-icons" style="color: #3498db;">inventory_2</i><span>PRODUCTOS</span>
             </div>
         </div>
-        <br><button onclick="location.reload()">Salir</button>
+        <br><button onclick="location.reload()" style="background:#95a5a6">Cerrar Sesión</button>
     </div>
 
     <div id="prod-screen" class="card full-screen hidden">
-        <button onclick="irMenu()">← Volver</button>
+        <button onclick="mostrarSeccion('menu-screen')" style="background:#7f8c8d">← Volver</button>
         <h3>Gestión de Inventario</h3>
-        <div style="background: #f1f1f1; padding: 15px; border-radius: 8px;">
+        <div class="section" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
             <input type="text" id="p-cod" placeholder="Código">
-            <input type="text" id="p-nom" placeholder="Nombre del Producto">
+            <input type="text" id="p-nom" placeholder="Nombre">
             <input type="number" id="p-pre" placeholder="Precio Gs.">
-            <input type="number" id="p-stock" placeholder="Stock Inicial">
-            <button onclick="guardarProducto()" style="background:#27ae60; width:100%">GUARDAR / ACTUALIZAR</button>
+            <input type="number" id="p-stock" placeholder="Stock">
+            <input type="text" id="p-img" placeholder="Link de Foto (URL)" style="grid-column: span 2;">
+            <button onclick="guardarProducto()" style="background:#27ae60; grid-column: span 2;">GUARDAR PRODUCTO</button>
         </div>
-        <table id="tabla-prod">
-            <thead><tr><th>Código</th><th>Producto</th><th>Precio</th><th>Stock</th></tr></thead>
+        <table id="tabla-prod-lista">
+            <thead><tr><th>Foto</th><th>Código</th><th>Producto</th><th>Precio</th><th>Stock</th></tr></thead>
             <tbody></tbody>
         </table>
     </div>
 
     <div id="venta-screen" class="card full-screen hidden">
-        <button onclick="irMenu()">← Volver</button>
+        <button onclick="mostrarSeccion('menu-screen')" style="background:#7f8c8d">← Volver</button>
         <h3>Módulo de Ventas</h3>
-        <p><i>(Aquí va el buscador de ventas que ya teníamos)</i></p>
+        <div style="display: flex; gap: 20px;">
+            <div class="section" style="flex: 1;">
+                <label><strong>Cliente:</strong></label>
+                <input type="text" id="busc-cliente" placeholder="Nombre o RUC..." onkeyup="buscarCliente()">
+                <div id="lista-clientes" class="sugerencias"></div>
+                <p id="cliente-seleccionado">Cliente: <b>Consumidor Final</b></p>
+            </div>
+            <div class="section" style="flex: 1;">
+                <label><strong>Producto:</strong></label>
+                <input type="text" id="busc-producto" placeholder="Nombre o Código..." onkeyup="buscarProducto()">
+                <div id="lista-productos" class="sugerencias"></div>
+            </div>
+        </div>
+        <table>
+            <thead><tr><th>Foto</th><th>Producto</th><th>Precio</th><th>Cant.</th><th>Subtotal</th><th></th></tr></thead>
+            <tbody id="tabla-venta"></tbody>
+        </table>
+        <div class="total-container">Total: <span id="gran-total">0</span> Gs.</div>
+        <button onclick="finalizarVenta()" style="background:#27ae60; width:100%; font-size:20px;">REGISTRAR VENTA</button>
     </div>
 
     <script>
+        let carrito = [];
+        let clienteActual = {nombre: "Consumidor Final", ruc: "0"};
+
+        function mostrarSeccion(id) {
+            document.querySelectorAll('.card').forEach(c => c.classList.add('hidden'));
+            document.getElementById(id).classList.remove('hidden');
+            if(id !== 'login-screen' && id !== 'menu-screen') {
+                document.body.style.alignItems = "flex-start"; document.body.style.padding = "20px";
+            } else {
+                document.body.style.alignItems = "center";
+            }
+        }
+
         async function login() {
             const res = await fetch('/login', {
                 method: 'POST',
@@ -74,28 +119,22 @@
                 body: JSON.stringify({nombre_usuario: document.getElementById('user').value, contrasena: document.getElementById('pass').value})
             });
             const data = await res.json();
-            if(data.success) { document.getElementById('login-screen').classList.add('hidden'); document.getElementById('menu-screen').classList.remove('hidden'); }
+            if(data.success) mostrarSeccion('menu-screen');
+            else document.getElementById('msg-error').innerText = "Credenciales incorrectas";
         }
 
-        function irMenu() { 
-            document.querySelectorAll('.card').forEach(c => c.classList.add('hidden')); 
-            document.getElementById('menu-screen').classList.remove('hidden'); 
-        }
-
-        async function abrirProductos() {
-            document.getElementById('menu-screen').classList.add('hidden');
-            document.getElementById('prod-screen').classList.remove('hidden');
-            listarProductos();
-        }
-
+        // --- FUNCIONES PRODUCTOS ---
         async function listarProductos() {
             const res = await fetch('/productos');
             const data = await res.json();
             let html = '';
             data.forEach(p => {
-                html += `<tr><td>${p.codigo}</td><td>${p.nombre}</td><td>${p.precio.toLocaleString()}</td><td>${p.stock}</td></tr>`;
+                html += `<tr>
+                    <td><img src="${p.imagen_url || ''}" class="img-tabla" onerror="this.src='https://via.placeholder.com/50'"></td>
+                    <td>${p.codigo}</td><td>${p.nombre}</td><td>${Number(p.precio).toLocaleString()}</td><td>${p.stock}</td>
+                </tr>`;
             });
-            document.querySelector('#tabla-prod tbody').innerHTML = html;
+            document.querySelector('#tabla-prod-lista tbody').innerHTML = html;
         }
 
         async function guardarProducto() {
@@ -103,20 +142,89 @@
                 codigo: document.getElementById('p-cod').value,
                 nombre: document.getElementById('p-nom').value,
                 precio: document.getElementById('p-pre').value,
-                stock: document.getElementById('p-stock').value
+                stock: document.getElementById('p-stock').value,
+                imagen_url: document.getElementById('p-img').value
             };
             await fetch('/guardar-producto', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify(prod)
             });
-            alert("Producto guardado");
+            alert("Producto guardado correctamente");
             listarProductos();
         }
 
-        function abrirVentas() {
-            document.getElementById('menu-screen').classList.add('hidden');
-            document.getElementById('venta-screen').classList.remove('hidden');
+        // --- FUNCIONES VENTAS ---
+        async function buscarProducto() {
+            const term = document.getElementById('busc-producto').value;
+            if(term.length < 1) { document.getElementById('lista-productos').innerHTML = ''; return; }
+            const res = await fetch(`/buscar-producto?term=${term}`);
+            const data = await res.json();
+            let html = '';
+            data.forEach(p => {
+                html += `<div class="sugerencia-item" onclick="agregarAlCarrito(${p.id}, '${p.nombre}', ${p.precio}, '${p.imagen_url}')">
+                    <img src="${p.imagen_url}" style="width:30px;height:30px;object-fit:cover"> ${p.nombre} - ${p.precio} Gs.
+                </div>`;
+            });
+            document.getElementById('lista-productos').innerHTML = html;
+        }
+
+        function agregarAlCarrito(id, nombre, precio, img) {
+            const existe = carrito.find(i => i.id === id);
+            if(existe) existe.cantidad++;
+            else carrito.push({id, nombre, precio, imagen_url: img, cantidad: 1});
+            document.getElementById('lista-productos').innerHTML = '';
+            document.getElementById('busc-producto').value = '';
+            renderizarTabla();
+        }
+
+        function renderizarTabla() {
+            let html = ''; let total = 0;
+            carrito.forEach((p, index) => {
+                let sub = p.precio * p.cantidad; total += sub;
+                html += `<tr>
+                    <td><img src="${p.imagen_url}" class="img-tabla"></td>
+                    <td>${p.nombre}</td><td>${Number(p.precio).toLocaleString()}</td>
+                    <td><input type="number" value="${p.cantidad}" onchange="carrito[${index}].cantidad=this.value;renderizarTabla()"></td>
+                    <td>${sub.toLocaleString()} Gs.</td>
+                    <td><button onclick="carrito.splice(${index},1);renderizarTabla()" style="background:red">X</button></td>
+                </tr>`;
+            });
+            document.getElementById('tabla-venta').innerHTML = html;
+            document.getElementById('gran-total').innerText = total.toLocaleString();
+        }
+
+        async function finalizarVenta() {
+            if(carrito.length === 0) return alert("Carrito vacío");
+            const res = await fetch('/finalizar-venta', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    cliente: clienteActual.nombre,
+                    carrito: carrito,
+                    total: parseInt(document.getElementById('gran-total').innerText.replace(/\./g, ''))
+                })
+            });
+            if(res.ok) { alert("¡Venta registrada y Stock actualizado!"); carrito = []; renderizarTabla(); }
+        }
+
+        // (Faltaría la función buscarCliente que es igual a la anterior)
+        async function buscarCliente() {
+            const term = document.getElementById('busc-cliente').value;
+            if(term.length < 1) { document.getElementById('lista-clientes').innerHTML = ''; return; }
+            const res = await fetch(`/buscar-cliente?term=${term}`);
+            const data = await res.json();
+            let html = '';
+            data.forEach(c => {
+                html += `<div class="sugerencia-item" onclick="seleccionarCliente('${c.nombre}', '${c.ruc_cedula}')">${c.nombre}</div>`;
+            });
+            document.getElementById('lista-clientes').innerHTML = html;
+        }
+
+        function seleccionarCliente(nombre, ruc) {
+            clienteActual = {nombre, ruc};
+            document.getElementById('cliente-seleccionado').innerHTML = `Cliente: <b>${nombre}</b>`;
+            document.getElementById('lista-clientes').innerHTML = '';
         }
     </script>
 </body>
