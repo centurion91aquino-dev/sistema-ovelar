@@ -123,7 +123,15 @@
             if(data.success) mostrarSeccion('menu-screen');
             else document.getElementById('msg-error').innerText = "Credenciales incorrectas";
         }
-
+<thead>
+    <tr>
+        <th>Foto</th>
+        <th>Cód</th>
+        <th>Nombre</th>
+        <th>Precio</th>
+        <th>Stock</th>
+        <th>Acción</th> </tr>
+</thead>
         // --- PRODUCTOS ---
         function abrirProductos() { mostrarSeccion('prod-screen'); listarProductos(); }
         
