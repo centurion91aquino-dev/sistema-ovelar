@@ -3,46 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema Ovelar - Menú</title>
+    <title>Sistema Ovelar</title>
     <style>
-        body { 
-            font-family: 'Segoe UI', sans-serif; 
-            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); 
-            margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; color: #333;
-        }
-
-        .card { 
-            background: white; padding: 30px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.3); 
-            width: 100%; max-width: 400px; text-align: center;
-        }
-
+        body { font-family: 'Segoe UI', sans-serif; background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+        .card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.3); width: 100%; max-width: 400px; text-align: center; }
         .hidden { display: none; }
-
-        /* MENU DE ICONOS */
-        .menu-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 20px; margin-top: 20px; }
-        .menu-item { 
-            background: #f8f9fa; padding: 20px; border-radius: 10px; cursor: pointer; 
-            transition: transform 0.2s, background 0.2s; border: 1px solid #eee;
-        }
-        .menu-item:hover { transform: translateY(-5px); background: #ebf5fb; border-color: #3498db; }
-        .menu-item i { font-size: 40px; display: block; margin-bottom: 10px; }
-        .menu-item span { font-weight: bold; color: #2c3e50; }
-
-        /* PANTALLA VENTA AMPLIADA */
-        .venta-modo { max-width: 950px; text-align: left; }
+        .menu-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-top: 20px; }
+        .menu-item { background: #f8f9fa; padding: 15px; border-radius: 10px; cursor: pointer; border: 1px solid #eee; transition: 0.2s; }
+        .menu-item:hover { background: #ebf5fb; transform: translateY(-3px); }
+        .menu-item i { font-size: 30px; display: block; }
         
-        input { padding: 12px; width: 100%; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; }
-        button { padding: 12px; background-color: #3498db; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; }
-        
-        .section { background: #f9f9f9; padding: 15px; border-radius: 8px; margin-bottom: 15px; border-left: 5px solid #3498db; position: relative; }
-        .sugerencias { border: 1px solid #ddd; background: white; position: absolute; width: calc(100% - 30px); z-index: 100; max-height: 150px; overflow-y: auto; }
-        .sugerencia-item { padding: 10px; cursor: pointer; border-bottom: 1px solid #eee; }
-        .sugerencia-item:hover { background-color: #ebf5fb; }
-
-        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-        th, td { padding: 12px; border: 1px solid #eee; text-align: left; }
-        th { background-color: #34495e; color: white; }
-        .total-container { text-align: right; font-size: 26px; font-weight: bold; margin-top: 20px; }
+        .full-screen { max-width: 900px; text-align: left; }
+        input { padding: 10px; width: 100%; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 5px; box-sizing: border-box; }
+        button { padding: 10px; background: #3498db; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { padding: 10px; border: 1px solid #eee; text-align: left; }
+        th { background: #34495e; color: white; }
     </style>
     <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
 </head>
@@ -52,160 +28,95 @@
         <h2>Sistema Ovelar</h2>
         <input type="text" id="user" placeholder="Usuario">
         <input type="password" id="pass" placeholder="Contraseña">
-        <button onclick="login()" style="width:100%">Iniciar Sesión</button>
-        <p id="msg-error" style="color:red"></p>
+        <button onclick="login()" style="width:100%">Entrar</button>
     </div>
 
-    <div id="menu-screen" class="card hidden" style="max-width: 600px;">
-        <h2>Panel Principal</h2>
+    <div id="menu-screen" class="card hidden" style="max-width: 500px;">
+        <h2>Menú Principal</h2>
         <div class="menu-grid">
-            <div class="menu-item" onclick="mostrarVentas()">
-                <i class="material-icons" style="color: #27ae60;">shopping_cart</i>
-                <span>VENTAS</span>
+            <div class="menu-item" onclick="abrirVentas()">
+                <i class="material-icons" style="color: #27ae60;">shopping_cart</i><span>VENTAS</span>
             </div>
-            <div class="menu-item" style="opacity: 0.5; cursor: not-allowed;">
-                <i class="material-icons" style="color: #3498db;">inventory_2</i>
-                <span>PRODUCTOS</span>
-            </div>
-            <div class="menu-item" style="opacity: 0.5; cursor: not-allowed;">
-                <i class="material-icons" style="color: #f39c12;">people</i>
-                <span>CLIENTES</span>
+            <div class="menu-item" onclick="abrirProductos()">
+                <i class="material-icons" style="color: #3498db;">inventory_2</i><span>PRODUCTOS</span>
             </div>
         </div>
-        <br>
-        <button onclick="location.reload()" style="background:#95a5a6; width:auto">Cerrar Sesión</button>
+        <br><button onclick="location.reload()">Salir</button>
     </div>
 
-    <div id="venta-screen" class="card venta-modo hidden">
-        <div style="display: flex; justify-content: space-between; align-items: center;">
-            <button onclick="irAlMenu()" style="background:#7f8c8d;">← Volver</button>
-            <h2 style="margin:0">Módulo de Ventas</h2>
-            <span></span>
+    <div id="prod-screen" class="card full-screen hidden">
+        <button onclick="irMenu()">← Volver</button>
+        <h3>Gestión de Inventario</h3>
+        <div style="background: #f1f1f1; padding: 15px; border-radius: 8px;">
+            <input type="text" id="p-cod" placeholder="Código">
+            <input type="text" id="p-nom" placeholder="Nombre del Producto">
+            <input type="number" id="p-pre" placeholder="Precio Gs.">
+            <input type="number" id="p-stock" placeholder="Stock Inicial">
+            <button onclick="guardarProducto()" style="background:#27ae60; width:100%">GUARDAR / ACTUALIZAR</button>
         </div>
-        <hr>
-        
-        <div style="display: flex; gap: 20px; margin-top:15px;">
-            <div class="section" style="flex: 1;">
-                <label><strong>Cliente:</strong></label>
-                <input type="text" id="busc-cliente" placeholder="Buscar..." onkeyup="buscarCliente()">
-                <div id="lista-clientes" class="sugerencias"></div>
-                <p id="cliente-seleccionado">Cliente: <b>Consumidor Final</b></p>
-            </div>
-            <div class="section" style="flex: 1;">
-                <label><strong>Producto:</strong></label>
-                <input type="text" id="busc-producto" placeholder="Nombre o Código..." onkeyup="buscarProducto()">
-                <div id="lista-productos" class="sugerencias"></div>
-            </div>
-        </div>
-
-        <table>
-            <thead>
-                <tr>
-                    <th>Producto</th>
-                    <th>Precio</th>
-                    <th style="width: 80px;">Cant.</th>
-                    <th>Subtotal</th>
-                    <th></th>
-                </tr>
-            </thead>
-            <tbody id="tabla-venta"></tbody>
+        <table id="tabla-prod">
+            <thead><tr><th>Código</th><th>Producto</th><th>Precio</th><th>Stock</th></tr></thead>
+            <tbody></tbody>
         </table>
+    </div>
 
-        <div class="total-container">Total: <span id="gran-total">0</span> Gs.</div>
-        <button onclick="finalizarVenta()" style="background:#27ae60; width:100%; font-size:20px;">REGISTRAR VENTA</button>
+    <div id="venta-screen" class="card full-screen hidden">
+        <button onclick="irMenu()">← Volver</button>
+        <h3>Módulo de Ventas</h3>
+        <p><i>(Aquí va el buscador de ventas que ya teníamos)</i></p>
     </div>
 
     <script>
-        let carrito = [];
-        let clienteActual = {nombre: "Consumidor Final", ruc: "0"};
-
         async function login() {
-            const user = document.getElementById('user').value;
-            const pass = document.getElementById('pass').value;
             const res = await fetch('/login', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({nombre_usuario: user, contrasena: pass})
+                body: JSON.stringify({nombre_usuario: document.getElementById('user').value, contrasena: document.getElementById('pass').value})
             });
             const data = await res.json();
-            if(data.success) {
-                document.getElementById('login-screen').classList.add('hidden');
-                document.getElementById('menu-screen').classList.remove('hidden');
-            } else {
-                document.getElementById('msg-error').innerText = "Acceso denegado";
-            }
+            if(data.success) { document.getElementById('login-screen').classList.add('hidden'); document.getElementById('menu-screen').classList.remove('hidden'); }
         }
 
-        function mostrarVentas() {
+        function irMenu() { 
+            document.querySelectorAll('.card').forEach(c => c.classList.add('hidden')); 
+            document.getElementById('menu-screen').classList.remove('hidden'); 
+        }
+
+        async function abrirProductos() {
+            document.getElementById('menu-screen').classList.add('hidden');
+            document.getElementById('prod-screen').classList.remove('hidden');
+            listarProductos();
+        }
+
+        async function listarProductos() {
+            const res = await fetch('/productos');
+            const data = await res.json();
+            let html = '';
+            data.forEach(p => {
+                html += `<tr><td>${p.codigo}</td><td>${p.nombre}</td><td>${p.precio.toLocaleString()}</td><td>${p.stock}</td></tr>`;
+            });
+            document.querySelector('#tabla-prod tbody').innerHTML = html;
+        }
+
+        async function guardarProducto() {
+            const prod = {
+                codigo: document.getElementById('p-cod').value,
+                nombre: document.getElementById('p-nom').value,
+                precio: document.getElementById('p-pre').value,
+                stock: document.getElementById('p-stock').value
+            };
+            await fetch('/guardar-producto', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(prod)
+            });
+            alert("Producto guardado");
+            listarProductos();
+        }
+
+        function abrirVentas() {
             document.getElementById('menu-screen').classList.add('hidden');
             document.getElementById('venta-screen').classList.remove('hidden');
-            document.body.style.alignItems = "flex-start";
-            document.body.style.padding = "20px";
-        }
-
-        function irAlMenu() {
-            document.getElementById('venta-screen').classList.add('hidden');
-            document.getElementById('menu-screen').classList.remove('hidden');
-            document.body.style.alignItems = "center";
-        }
-
-        async function buscarCliente() {
-            const term = document.getElementById('busc-cliente').value;
-            if(term.length < 1) { document.getElementById('lista-clientes').innerHTML = ''; return; }
-            const res = await fetch(`/buscar-cliente?term=${term}`);
-            const clientes = await res.json();
-            let html = '';
-            clientes.forEach(c => {
-                html += `<div class="sugerencia-item" onclick="seleccionarCliente('${c.nombre}', '${c.ruc_cedula}')">${c.nombre}</div>`;
-            });
-            document.getElementById('lista-clientes').innerHTML = html;
-        }
-
-        function seleccionarCliente(nombre, ruc) {
-            clienteActual = {nombre, ruc};
-            document.getElementById('cliente-seleccionado').innerHTML = `Cliente: <b>${nombre}</b>`;
-            document.getElementById('lista-clientes').innerHTML = '';
-            document.getElementById('busc-cliente').value = '';
-        }
-
-        async function buscarProducto() {
-            const term = document.getElementById('busc-producto').value;
-            if(term.length < 1) { document.getElementById('lista-productos').innerHTML = ''; return; }
-            const res = await fetch(`/buscar-producto?term=${term}`);
-            const productos = await res.json();
-            let html = '';
-            productos.forEach(p => {
-                html += `<div class="sugerencia-item" onclick="agregarAlCarrito(${p.id}, '${p.nombre}', ${p.precio})">${p.nombre} - ${p.precio} Gs.</div>`;
-            });
-            document.getElementById('lista-productos').innerHTML = html;
-        }
-
-        function agregarAlCarrito(id, nombre, precio) {
-            const existe = carrito.find(item => item.id === id);
-            if(existe) existe.cantidad++;
-            else carrito.push({id, nombre, precio, cantidad: 1});
-            document.getElementById('lista-productos').innerHTML = '';
-            document.getElementById('busc-producto').value = '';
-            renderizarTabla();
-        }
-
-        function renderizarTabla() {
-            let html = ''; let total = 0;
-            carrito.forEach((p, index) => {
-                let sub = p.precio * p.cantidad; total += sub;
-                html += `<tr><td>${p.nombre}</td><td>${Number(p.precio).toLocaleString()}</td>
-                <td><input type="number" value="${p.cantidad}" onchange="carrito[${index}].cantidad=this.value;renderizarTabla()"></td>
-                <td>${sub.toLocaleString()} Gs.</td>
-                <td><button onclick="carrito.splice(${index},1);renderizarTabla()" style="background:red">X</button></td></tr>`;
-            });
-            document.getElementById('tabla-venta').innerHTML = html;
-            document.getElementById('gran-total').innerText = total.toLocaleString();
-        }
-
-        function finalizarVenta() {
-            if(carrito.length === 0) return alert("Carrito vacío");
-            alert("Venta Registrada con éxito");
-            carrito = []; renderizarTabla();
         }
     </script>
 </body>
