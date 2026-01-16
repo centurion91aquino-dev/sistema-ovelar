@@ -76,15 +76,42 @@ app.delete('/eliminar-producto/:id', async (req, res) => {
 
 // --- RUTA DE VENTAS (MÁXIMA ESTABILIDAD) ---
 
+// Asegúrate de que diga "async (req, res)" al principio
 app.post('/finalizar-venta', async (req, res) => {
     const { cliente, total, carrito } = req.body;
     
-    // Iniciamos una transacción para que si algo falla, no se descuente stock a medias
+    // Pedimos un cliente al pool para la transacción
     const client = await pool.connect();
     
     try {
         await client.query('BEGIN');
 
+        // 1. Insertar la venta
+        const ventaRes = await client.query(
+            'INSERT INTO ventas (cliente, total) VALUES ($1, $2) RETURNING id',
+            [cliente || 'Consumidor Final', total]
+        );
+        const ventaId = ventaRes.rows[0].id;
+
+        // 2. Descontar stock
+        for (const item of carrito) {
+            await client.query(
+                'UPDATE productos SET stock = stock - $1 WHERE id = $2',
+                [item.cantidad, item.id]
+            );
+        }
+
+        await client.query('COMMIT');
+        res.status(200).json({ success: true });
+
+    } catch (err) {
+        await client.query('ROLLBACK');
+        console.error("DETALLE ERROR VENTA:", err.message);
+        res.status(500).json({ error: "Error en BD: " + err.message });
+    } finally {
+        client.release();
+    }
+});
         // 1. Insertar la venta
         const ventaRes = await client.query(
             'INSERT INTO ventas (cliente, total) VALUES ($1, $2) RETURNING id',
@@ -156,4 +183,5 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`Servidor corriendo en puerto ${PORT}`);
 });
+
 
