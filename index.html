@@ -281,60 +281,144 @@
     </div>
 
     <script>
-        let carrito = [];
-        let clienteActual = {nombre: "Consumidor Final"};
-        let editandoId = null;
+     let carrito = [];
+    let clienteActual = { nombre: "Consumidor Final" };
+    let editandoId = null;
 
-        function mostrarSeccion(id) {
-            document.querySelectorAll('.card').forEach(c => c.classList.add('hidden'));
-            document.getElementById(id).classList.remove('hidden');
-            document.body.style.alignItems = (id === 'login-screen' || id === 'menu-screen') ? "center" : "flex-start";
+    function mostrarSeccion(id) {
+        document.querySelectorAll('.card').forEach(c => c.classList.add('hidden'));
+        document.getElementById(id).classList.remove('hidden');
+        document.body.style.alignItems = (id === 'login-screen' || id === 'menu-screen') ? "center" : "flex-start";
+    }
+
+    async function ejecutarLogin() {
+        const u = document.getElementById('user').value;
+        const p = document.getElementById('pass').value;
+        const res = await fetch('/login', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({nombre_usuario: u, contrasena: p}) });
+        const data = await res.json();
+        if(data.success) mostrarSeccion('menu-screen');
+        else document.getElementById('msg-error').innerText = "Acceso Denegado";
+    }
+
+    // --- PRODUCTOS ---
+    function abrirProductos() { mostrarSeccion('prod-screen'); listarProductos(); }
+    async function listarProductos() {
+        const res = await fetch('/productos');
+        const data = await res.json();
+        let html = '';
+        data.forEach(p => {
+            html += `<tr><td><img src="${p.imagen_url || ''}" class="img-tabla" onerror="this.src='https://via.placeholder.com/50'"></td>
+            <td>${p.codigo || ''}</td><td>${p.nombre}</td><td>${Number(p.precio).toLocaleString()}</td><td>${p.stock}</td>
+            <td><button class="btn-edit" onclick='prepararEdicion(${JSON.stringify(p)})'>Editar</button>
+            <button class="btn-del" onclick="eliminarProducto(${p.id})">Borrar</button></td></tr>`;
+        });
+        document.getElementById('lista-prod-body').innerHTML = html;
+    }
+
+    async function guardarProducto() {
+        const prod = { id: editandoId, codigo: document.getElementById('p-cod').value, nombre: document.getElementById('p-nom').value, 
+                       precio: document.getElementById('p-pre').value, stock: document.getElementById('p-stock').value, imagen_url: document.getElementById('p-img').value };
+        await fetch('/guardar-producto', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(prod) });
+        alert("Operación Exitosa");
+        location.reload(); 
+    }
+
+    // --- VENTAS (ESTO ES LO QUE FALTA) ---
+    function abrirVentas() {
+        mostrarSeccion('venta-screen');
+        carrito = [];
+        renderizarTabla();
+    }
+
+    async function buscarProducto() {
+        const term = document.getElementById('busc-producto').value;
+        const lista = document.getElementById('lista-productos');
+        if(term.length < 1) { lista.innerHTML = ''; return; }
+
+        const res = await fetch(`/buscar-producto?term=${term}`);
+        const data = await res.json();
+        
+        let html = '';
+        data.forEach(p => {
+            html += `<div class="sugerencia-item" onclick="agregarAlCarrito(${p.id}, '${p.nombre}', ${p.precio}, '${p.imagen_url}')">
+                <b>${p.codigo || ''}</b> - ${p.nombre} (${Number(p.precio).toLocaleString()} Gs.)
+            </div>`;
+        });
+        lista.innerHTML = html;
+    }
+
+    function agregarAlCarrito(id, nombre, precio, img) {
+        const existe = carrito.find(item => item.id === id);
+        if(existe) {
+            existe.cantidad++;
+        } else {
+            carrito.push({ id, nombre, precio, imagen_url: img, cantidad: 1 });
         }
+        document.getElementById('busc-producto').value = '';
+        document.getElementById('lista-productos').innerHTML = '';
+        renderizarTabla();
+    }
 
-        async function ejecutarLogin() {
-            const u = document.getElementById('user').value;
-            const p = document.getElementById('pass').value;
-            const res = await fetch('/login', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({nombre_usuario: u, contrasena: p})
-            });
-            const data = await res.json();
-            if(data.success) mostrarSeccion('menu-screen');
-            else document.getElementById('msg-error').innerText = "Acceso Denegado";
+    function renderizarTabla() {
+        let html = '';
+        let total = 0;
+        carrito.forEach((p, i) => {
+            let subtotal = p.precio * p.cantidad;
+            total += subtotal;
+            html += `<tr>
+                <td><img src="${p.imagen_url}" class="img-tabla"></td>
+                <td>${p.nombre}</td>
+                <td>${Number(p.precio).toLocaleString()}</td>
+                <td><input type="number" value="${p.cantidad}" style="width:60px; margin:0" onchange="actualizarCantidad(${i}, this.value)"></td>
+                <td>${subtotal.toLocaleString()}</td>
+                <td><button onclick="quitarDelCarrito(${i})" style="background:red; width:auto; padding:5px 10px">X</button></td>
+            </tr>`;
+        });
+        document.getElementById('tabla-venta').innerHTML = html;
+        document.getElementById('gran-total').innerText = total.toLocaleString();
+    }
+
+    function actualizarCantidad(indice, valor) {
+        carrito[indice].cantidad = parseInt(valor);
+        renderizarTabla();
+    }
+
+    function quitarDelCarrito(indice) {
+        carrito.splice(indice, 1);
+        renderizarTabla();
+    }
+
+    async function finalizarVenta() {
+        if(carrito.length === 0) return alert("El carrito está vacío");
+        const total = parseInt(document.getElementById('gran-total').innerText.replace(/\./g, ''));
+        
+        const res = await fetch('/finalizar-venta', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ cliente: clienteActual.nombre, total: total, carrito: carrito })
+        });
+
+        if(res.ok) {
+            alert("Venta registrada con éxito");
+            carrito = [];
+            renderizarTabla();
+            mostrarSeccion('menu-screen');
         }
+    }
 
-        // --- SECCIÓN PRODUCTOS ---
-        function abrirProductos() { mostrarSeccion('prod-screen'); listarProductos(); }
-
-        async function listarProductos() {
-            try {
-                const res = await fetch('/productos');
-                const data = await res.json();
-                const tbody = document.getElementById('lista-prod-body');
-                let html = '';
-                
-                if (data.length === 0) {
-                    html = '<tr><td colspan="6" style="text-align:center">No hay productos.</td></tr>';
-                } else {
-                    data.forEach(p => {
-                        html += `<tr>
-                            <td><img src="${p.imagen_url || ''}" class="img-tabla" onerror="this.src='https://via.placeholder.com/50'"></td>
-                            <td>${p.codigo || ''}</td>
-                            <td>${p.nombre}</td>
-                            <td>${Number(p.precio).toLocaleString()}</td>
-                            <td>${p.stock}</td>
-                            <td>
-                                <button onclick='prepararEdicion(${JSON.stringify(p)})' style="background:#f39c12;width:auto;padding:5px 8px;margin-bottom:2px">Editar</button>
-                                <button onclick="eliminarProducto(${p.id})" style="background:#e74c3c;width:auto;padding:5px 8px">Borrar</button>
-                            </td>
-                        </tr>`;
-                    });
-                }
-                tbody.innerHTML = html;
-            } catch(e) { console.error(e); }
-        }
-
+    async function abrirReportes() {
+        mostrarSeccion('reporte-screen');
+        const res = await fetch('/historial-ventas');
+        const data = await res.json();
+        let html = ''; let suma = 0;
+        data.forEach(v => {
+            suma += parseInt(v.total);
+            html += `<tr><td>${new Date(v.fecha).toLocaleString()}</td><td>${v.cliente}</td><td>${Number(v.total).toLocaleString()}</td>
+            <td><button onclick="alert('Venta ID: '+${v.id})" style="padding:5px; width:auto">Ver</button></td></tr>`;
+        });
+        document.getElementById('lista-ventas-body').innerHTML = html;
+        document.getElementById('total-ventas-valor').innerText = suma.toLocaleString();
+    }
         function prepararEdicion(p) {
             editandoId = p.id;
             document.getElementById('p-cod').value = p.codigo;
