@@ -74,20 +74,37 @@ app.get('/buscar-producto', async (req, res) => {
         res.status(500).json({ error: "Error en el servidor" });
     }
 });
-
 app.post('/finalizar-venta', async (req, res) => {
     const { cliente, total, carrito } = req.body;
+
     try {
-        const venta = await pool.query('INSERT INTO ventas (cliente, total) VALUES ($1, $2) RETURNING id', [cliente, total]);
-        const ventaId = venta.rows[0].id;
+        // 1. Guardar la cabecera de la venta
+        const nuevaVenta = await pool.query(
+            'INSERT INTO ventas (cliente, total) VALUES ($1, $2) RETURNING id',
+            [cliente, total]
+        );
+        const ventaId = nuevaVenta.rows[0].id;
+
+        // 2. Guardar cada producto y DESCONTAR stock
         for (const item of carrito) {
-            await pool.query('INSERT INTO detalle_ventas (venta_id, producto_id, cantidad, precio) VALUES ($1, $2, $3, $4)', [ventaId, item.id, item.cantidad, item.precio]);
-            await pool.query('UPDATE productos SET stock = stock - $1 WHERE id = $2', [item.cantidad, item.id]);
+            // Guardar detalle
+            await pool.query(
+                'INSERT INTO detalle_ventas (venta_id, producto_id, cantidad, precio) VALUES ($1, $2, $3, $4)',
+                [ventaId, item.id, item.cantidad, item.precio]
+            );
+            // DESCONTAR STOCK (La magia del sistema)
+            await pool.query(
+                'UPDATE productos SET stock = stock - $1 WHERE id = $2',
+                [item.cantidad, item.id]
+            );
         }
-        res.sendStatus(200);
+
+        res.status(200).json({ success: true, message: "Venta completada" });
     } catch (err) {
-        res.status(500).send(err.message);
+        console.error("Error al finalizar venta:", err);
+        res.status(500).json({ error: "Fallo en la base de datos" });
     }
+});
 });
 
 app.get('/historial-ventas', async (req, res) => {
@@ -108,5 +125,6 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`Servidor en puerto ${PORT}`);
 });
+
 
 
