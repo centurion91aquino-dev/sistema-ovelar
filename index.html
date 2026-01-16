@@ -141,16 +141,31 @@
         // --- PRODUCTOS ---
         function abrirProductos() { mostrarSeccion('prod-screen'); listarProductos(); }
         async function listarProductos() {
-            const res = await fetch('/productos');
-            const data = await res.json();
-            let html = '';
-            data.forEach(p => {
-                html += `<tr><td><img src="${p.imagen_url}" class="img-tabla"></td><td>${p.codigo || ''}</td><td>${p.nombre}</td>
-                <td>${Number(p.precio).toLocaleString()}</td><td>${p.stock}</td>
-                <td><button onclick='prepararEdicion(${JSON.stringify(p)})' style="background:#f39c12;width:auto;padding:5px">E</button></td></tr>`;
-            });
-            document.getElementById('lista-prod-body').innerHTML = html;
-        }
+    try {
+        const res = await fetch('/productos');
+        const data = await res.json();
+        let html = '';
+        data.forEach(p => {
+            // Guardamos el producto en una versión de texto segura
+            const pSrt = JSON.stringify(p).replace(/'/g, "&apos;");
+            
+            html += `<tr>
+                <td><img src="${p.imagen_url}" class="img-tabla" onerror="this.src='https://via.placeholder.com/50'"></td>
+                <td>${p.codigo || ''}</td>
+                <td>${p.nombre}</td>
+                <td>${Number(p.precio).toLocaleString()}</td>
+                <td>${p.stock}</td>
+                <td>
+                    <button onclick='prepararEdicion(${pSrt})' style="background:#f39c12; width:auto; padding:5px 10px; cursor:pointer; border-radius:4px; border:none; color:white;">Editar</button>
+                    <button onclick="eliminarProducto(${p.id})" style="background:#e74c3c; width:auto; padding:5px 10px; cursor:pointer; border-radius:4px; border:none; color:white; margin-left:5px;">Borrar</button>
+                </td>
+            </tr>`;
+        });
+        document.getElementById('lista-prod-body').innerHTML = html;
+    } catch (e) {
+        console.error("Error al listar:", e);
+    }
+}
 
         async function guardarProducto() {
             const prod = { id: editandoId, codigo: document.getElementById('p-cod').value, nombre: document.getElementById('p-nom').value, 
