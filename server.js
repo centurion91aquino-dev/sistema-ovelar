@@ -92,13 +92,18 @@ app.post('/finalizar-venta', async (req, res) => {
         );
         const ventaId = ventaRes.rows[0].id;
 
-        // 2. Descontar stock por cada producto en el carrito
+       // 2. Descontar stock por cada producto en el carrito
         for (const item of carrito) {
             // Verificamos que el producto existe y restamos stock
-            const stockRes = await client.query(
+            const stockRes = await client.query( // <-- Asegúrate que diga await aquí
                 'UPDATE productos SET stock = stock - $1 WHERE id = $2',
                 [item.cantidad, item.id]
             );
+            
+            if (stockRes.rowCount === 0) {
+                throw new Error(`El producto con ID ${item.id} no existe.`);
+            }
+        }
             
             if (stockRes.rowCount === 0) {
                 throw new Error(`El producto con ID ${item.id} no existe.`);
@@ -151,3 +156,4 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`Servidor corriendo en puerto ${PORT}`);
 });
+
