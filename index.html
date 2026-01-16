@@ -3,49 +3,72 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema Ovelar - Gestión</title>
+    <title>Sistema Ovelar - v2026</title>
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background: #1e3c72; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 10px; box-sizing: border-box; color: #333; }
-        .card { background: white; padding: 25px; border-radius: 12px; width: 100%; max-width: 400px; text-align: center; box-sizing: border-box; box-shadow: 0 10px 20px rgba(0,0,0,0.2); }
-        .hidden { display: none; }
-        .full-screen { max-width: 950px; text-align: left; }
+        body { font-family: 'Segoe UI', sans-serif; background: #1e3c72; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 10px; box-sizing: border-box; }
+        .card { background: white; padding: 25px; border-radius: 12px; width: 100%; max-width: 400px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.3); }
+        .hidden { display: none !important; }
+        .full-screen { max-width: 980px; text-align: left; }
         input { padding: 12px; width: 100%; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; font-size: 16px; }
         button { padding: 12px; background: #3498db; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; width: 100%; margin-bottom: 5px; }
-        .menu-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 15px; margin-top: 20px; }
+        .menu-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 15px; margin-top: 20px; }
         .menu-item { background: #f8f9fa; padding: 20px; border-radius: 10px; cursor: pointer; border: 1px solid #eee; text-align: center; font-weight: bold; }
-        .section { background: #f9f9f9; padding: 15px; border-radius: 8px; margin-bottom: 15px; border-left: 5px solid #3498db; }
-        .table-wrapper { overflow-x: auto; width: 100%; background: white; border-radius: 8px; margin-top: 10px; border: 1px solid #eee; }
+        .section { background: #f9f9f9; padding: 15px; border-radius: 8px; margin-bottom: 15px; border-left: 5px solid #3498db; position: relative; }
+        .table-wrapper { overflow-x: auto; width: 100%; background: white; border-radius: 8px; border: 1px solid #eee; }
         table { width: 100%; border-collapse: collapse; min-width: 600px; }
         th, td { padding: 12px; border-bottom: 1px solid #eee; text-align: left; font-size: 14px; }
         th { background: #34495e; color: white; }
-        .img-tabla { width: 45px; height: 45px; object-fit: cover; border-radius: 5px; background: #f0f0f0; }
-        .btn-edit { background: #f39c12; color: white; padding: 5px 10px; border-radius: 4px; font-size: 12px; border: none; cursor: pointer; }
-        .btn-del { background: #e74c3c; color: white; padding: 5px 10px; border-radius: 4px; font-size: 12px; border: none; cursor: pointer; }
+        .img-tabla { width: 45px; height: 45px; object-fit: cover; border-radius: 5px; background: #eee; }
+        
+        /* ESTILOS CRÍTICOS DEL BUSCADOR */
+        .contenedor-buscador { position: relative; width: 100%; }
+        #lista-productos { 
+            position: absolute; 
+            top: 45px; 
+            left: 0; 
+            width: 100%; 
+            background: white; 
+            border: 1px solid #3498db; 
+            z-index: 9999 !important; 
+            max-height: 250px; 
+            overflow-y: auto; 
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            border-radius: 0 0 8px 8px;
+        }
+        .sugerencia-item { 
+            padding: 12px; 
+            cursor: pointer; 
+            border-bottom: 1px solid #eee; 
+            display: flex; 
+            align-items: center; 
+            gap: 12px; 
+        }
+        .sugerencia-item:hover { background: #ebf5fb; }
     </style>
 </head>
 <body>
 
     <div id="login-screen" class="card">
-        <h2>SISTEMA OVELAR</h2>
+        <h2 style="margin-top:0">SISTEMA OVELAR</h2>
         <input type="text" id="user" placeholder="Usuario">
         <input type="password" id="pass" placeholder="Contraseña">
         <button onclick="ejecutarLogin()">INGRESAR</button>
-        <p id="msg-error" style="color:red; font-size: 14px;"></p>
+        <p id="msg-error" style="color:red; font-size:14px;"></p>
     </div>
 
     <div id="menu-screen" class="card hidden" style="max-width: 600px;">
-        <h2>Panel de Control</h2>
+        <h3>Bienvenido</h3>
         <div class="menu-grid">
-            <div class="menu-item" onclick="mostrarSeccion('venta-screen')">🛒<br>VENTAS</div>
+            <div class="menu-item" onclick="abrirVentas()">🛒<br>VENTAS</div>
             <div class="menu-item" onclick="abrirProductos()">📦<br>PRODUCTOS</div>
             <div class="menu-item" onclick="abrirReportes()">📊<br>REPORTES</div>
         </div>
-        <br><button onclick="location.reload()" style="background:#95a5a6">Cerrar Sesión</button>
+        <br><button onclick="location.reload()" style="background:#95a5a6">Salir</button>
     </div>
 
     <div id="prod-screen" class="card full-screen hidden">
         <button onclick="mostrarSeccion('menu-screen')" style="width:auto; background:#7f8c8d;">← Volver</button>
-        <h3>Gestión de Productos</h3>
+        <h3>Inventario</h3>
         <div class="section">
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
                 <input type="text" id="p-cod" placeholder="Código">
@@ -54,74 +77,50 @@
                 <input type="number" id="p-stock" placeholder="Stock">
             </div>
             <input type="text" id="p-img" placeholder="URL Imagen">
-            <button id="btn-guardar-prod" onclick="guardarProducto()" style="background:#27ae60">GUARDAR PRODUCTO</button>
+            <button id="btn-guardar-prod" onclick="guardarProducto()" style="background:#27ae60">GUARDAR</button>
         </div>
         <div class="table-wrapper">
             <table>
-                <thead>
-                    <tr>
-                        <th>Foto</th>
-                        <th>Cód</th>
-                        <th>Producto</th>
-                        <th>Precio</th>
-                        <th>Stock</th>
-                        <th>Acciones</th>
-                    </tr>
-                </thead>
+                <thead><tr><th>Foto</th><th>Cód</th><th>Nombre</th><th>Precio</th><th>Stock</th><th>Acción</th></tr></thead>
                 <tbody id="lista-prod-body"></tbody>
             </table>
         </div>
     </div>
 
-        <div id="venta-screen" class="card full-screen hidden">
+    <div id="venta-screen" class="card full-screen hidden">
         <button onclick="mostrarSeccion('menu-screen')" style="width:auto; background:#7f8c8d;">← Volver</button>
         <h3>Nueva Venta</h3>
-        
-        <div style="display: flex; flex-wrap: wrap; gap: 15px;">
-            <div class="section" style="flex: 1; min-width: 250px;">
-                <label><strong>Cliente:</strong></label>
-                <input type="text" id="busc-cliente" placeholder="Buscar cliente..." onkeyup="buscarCliente()">
-                <div id="lista-clientes" class="sugerencias"></div>
-                <p id="cliente-seleccionado" style="margin-top:5px; color:#2980b9;">Seleccionado: <b>Consumidor Final</b></p>
-            </div>
-
-            <div class="section" style="flex: 1; min-width: 250px;">
-                <label><strong>Buscar Producto:</strong></label>
-                <input type="text" id="busc-producto" placeholder="Escribe nombre o código..." onkeyup="buscarProducto()">
-                <div id="lista-productos" class="sugerencias"></div>
+        <div class="section">
+            <div class="contenedor-buscador">
+                <label><strong>Buscar Producto (Nombre o Código):</strong></label>
+                <input type="text" id="busc-producto" placeholder="Escribe para buscar..." onkeyup="buscarProducto()">
+                <div id="lista-productos" class="hidden"></div>
             </div>
         </div>
-
         <div class="table-wrapper">
             <table>
-                <thead>
-                    <tr>
-                        <th>Foto</th>
-                        <th>Producto</th>
-                        <th>Precio</th>
-                        <th>Cantidad</th>
-                        <th>Subtotal</th>
-                        <th>Acción</th>
-                    </tr>
-                </thead>
-                <tbody id="tabla-venta">
-                    </tbody>
+                <thead><tr><th>Producto</th><th>Precio</th><th>Cant.</th><th>Subtotal</th><th>X</th></tr></thead>
+                <tbody id="tabla-venta"></tbody>
             </table>
         </div>
+        <h2 style="text-align:right">Total: <span id="gran-total">0</span> Gs.</h2>
+        <button onclick="finalizarVenta()" style="background:#27ae60; font-size:18px;">FINALIZAR VENTA</button>
+    </div>
 
-        <div style="text-align: right; margin-top: 20px;">
-            <h2 style="margin: 0; color: #2c3e50;">Total: <span id="gran-total">0</span> Gs.</h2>
-            <br>
-            <button onclick="finalizarVenta()" style="background:#27ae60; font-size:20px; width: 300px;">REGISTRAR VENTA</button>
-        </div>
-    </div> 
     <div id="reporte-screen" class="card full-screen hidden">
         <button onclick="mostrarSeccion('menu-screen')" style="width:auto; background:#7f8c8d;">← Volver</button>
-        <h3>Reporte de Ventas</h3>
-        <tbody id="lista-ventas-body"></tbody>
+        <h3>Historial</h3>
+        <div class="section" style="background:#2c3e50; color:white;">Total Ventas: <span id="total-ventas-valor">0</span> Gs.</div>
+        <div class="table-wrapper">
+            <table>
+                <thead><tr><th>Fecha</th><th>Cliente</th><th>Total</th><th>Ver</th></tr></thead>
+                <tbody id="lista-ventas-body"></tbody>
+            </table>
+        </div>
     </div>
 
     <script>
+        let carrito = [];
         let editandoId = null;
 
         function mostrarSeccion(id) {
@@ -136,421 +135,68 @@
             const res = await fetch('/login', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({nombre_usuario: u, contrasena: p}) });
             const data = await res.json();
             if(data.success) mostrarSeccion('menu-screen');
-            else document.getElementById('msg-error').innerText = "Acceso Denegado";
+            else document.getElementById('msg-error').innerText = "Credenciales incorrectas";
         }
 
-        // --- LÓGICA DE PRODUCTOS ---
-        function abrirProductos() {
-            mostrarSeccion('prod-screen');
-            listarProductos();
-        }
-
+        // --- PRODUCTOS ---
+        function abrirProductos() { mostrarSeccion('prod-screen'); listarProductos(); }
         async function listarProductos() {
-    const tbody = document.getElementById('lista-prod-body');
-    tbody.innerHTML = '<tr><td colspan="6">Cargando productos...</td></tr>';
-    
-    try {
-        // Usamos una ruta relativa para que funcione tanto en local como en Render
-        const res = await fetch('/productos');
-        
-        if (!res.ok) {
-            throw new Error(`Error del servidor: ${res.status}`);
-        }
-
-        const productos = await res.json();
-        
-        let html = '';
-        if (productos.length === 0) {
-            html = '<tr><td colspan="6" style="text-align:center">No hay productos. ¡Agrega el primero arriba!</td></tr>';
-        } else {
-            productos.forEach(p => {
-                // Limpiamos los datos para evitar errores con comillas en los nombres
-                const pLimpio = JSON.stringify(p).replace(/'/g, "&apos;");
-                html += `
-                <tr>
-                    <td><img src="${p.imagen_url || ''}" class="img-tabla" onerror="this.src='https://via.placeholder.com/50'"></td>
-                    <td>${p.codigo || ''}</td>
-                    <td>${p.nombre}</td>
-                    <td>${Number(p.precio).toLocaleString()}</td>
-                    <td>${p.stock}</td>
-                    <td>
-                        <button class="btn-edit" onclick='prepararEdicion(${pLimpio})'>Editar</button>
-                        <button class="btn-del" onclick="eliminarProducto(${p.id})">Borrar</button>
-                    </td>
-                </tr>`;
+            const res = await fetch('/productos');
+            const data = await res.json();
+            let html = '';
+            data.forEach(p => {
+                html += `<tr><td><img src="${p.imagen_url}" class="img-tabla"></td><td>${p.codigo || ''}</td><td>${p.nombre}</td>
+                <td>${Number(p.precio).toLocaleString()}</td><td>${p.stock}</td>
+                <td><button onclick='prepararEdicion(${JSON.stringify(p)})' style="background:#f39c12;width:auto;padding:5px">E</button></td></tr>`;
             });
-        }
-        tbody.innerHTML = html;
-    } catch (error) {
-        console.error("Error detallado:", error);
-        tbody.innerHTML = `<tr><td colspan="6" style="color:red">Error: ${error.message}. Revisa si el servidor está encendido.</td></tr>`;
-    }
-}
-        function prepararEdicion(p) {
-            editandoId = p.id;
-            document.getElementById('p-cod').value = p.codigo;
-            document.getElementById('p-nom').value = p.nombre;
-            document.getElementById('p-pre').value = p.precio;
-            document.getElementById('p-stock').value = p.stock;
-            document.getElementById('p-img').value = p.imagen_url;
-            
-            const btn = document.getElementById('btn-guardar-prod');
-            btn.innerText = "ACTUALIZAR PRODUCTO";
-            btn.style.background = "#f39c12";
-            window.scrollTo(0,0);
+            document.getElementById('lista-prod-body').innerHTML = html;
         }
 
         async function guardarProducto() {
-            const prod = {
-                id: editandoId,
-                codigo: document.getElementById('p-cod').value,
-                nombre: document.getElementById('p-nom').value,
-                precio: document.getElementById('p-pre').value,
-                stock: document.getElementById('p-stock').value,
-                imagen_url: document.getElementById('p-img').value
-            };
-
-            const res = await fetch('/guardar-producto', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify(prod)
-            });
-
-            if (res.ok) {
-                alert("Guardado correctamente");
-                editandoId = null;
-                document.getElementById('btn-guardar-prod').innerText = "GUARDAR PRODUCTO";
-                document.getElementById('btn-guardar-prod').style.background = "#27ae60";
-                document.querySelectorAll('.section input').forEach(i => i.value = '');
-                listarProductos();
-            }
-        }
-
-        async function eliminarProducto(id) {
-            if (confirm("¿Seguro que quieres eliminar este producto?")) {
-                await fetch(`/eliminar-producto/${id}`, { method: 'DELETE' });
-                listarProductos();
-            }
-        }
-
-        function abrirReportes() { mostrarSeccion('reporte-screen'); }
-    </script>
-</body>
-</html>                <thead><tr><th>Foto</th><th>Cód</th><th>Nombre</th><th>Precio</th><th>Stock</th><th>Acción</th></tr></thead>
-                <tbody id="lista-prod-body"></tbody>
-            </table>
-        </div>
-    </div>
-
-    <div id="venta-screen" class="card full-screen hidden">
-        <button onclick="mostrarSeccion('menu-screen')" style="width:auto; background:#7f8c8d;">← Volver</button>
-        <h3>Nueva Venta</h3>
-        <div style="display: flex; flex-wrap: wrap; gap: 15px;">
-            <div class="section" style="flex: 1; min-width: 250px;">
-                <input type="text" id="busc-cliente" placeholder="Buscar cliente..." onkeyup="buscarCliente()">
-                <div id="lista-clientes" class="sugerencias"></div>
-                <p id="cliente-seleccionado">Cliente: <b>Consumidor Final</b></p>
-            </div>
-            <div class="section" style="flex: 1; min-width: 250px;">
-                <input type="text" id="busc-producto" placeholder="Buscar producto..." onkeyup="buscarProducto()">
-                <div id="lista-productos" class="sugerencias"></div>
-            </div>
-        </div>
-        <div class="table-wrapper">
-            <table>
-                <thead><tr><th>Foto</th><th>Producto</th><th>Precio</th><th>Cant.</th><th>Subtotal</th><th></th></tr></thead>
-                <tbody id="tabla-venta"></tbody>
-            </table>
-        </div>
-        <h2 style="text-align:right">Total: <span id="gran-total">0</span> Gs.</h2>
-        <button onclick="finalizarVenta()" style="background:#27ae60; font-size:20px;">REGISTRAR VENTA</button>
-    </div>
-
-    <div id="reporte-screen" class="card full-screen hidden">
-        <button onclick="mostrarSeccion('menu-screen')" style="width:auto; background:#7f8c8d;">← Volver</button>
-        <h3>Historial de Ventas</h3>
-        <div class="section" style="background:#2c3e50; color:white; text-align:center;">
-            <h2 style="margin:0">Total Acumulado: <span id="total-ventas-valor">0</span> Gs.</h2>
-        </div>
-        <div class="table-wrapper">
-            <table>
-                <thead><tr><th>Fecha</th><th>Cliente</th><th>Total</th><th>Acción</th></tr></thead>
-                <tbody id="lista-ventas-body"></tbody>
-            </table>
-        </div>
-    </div>
-
-    <script>
-     let carrito = [];
-    let clienteActual = { nombre: "Consumidor Final" };
-    let editandoId = null;
-
-    function mostrarSeccion(id) {
-        document.querySelectorAll('.card').forEach(c => c.classList.add('hidden'));
-        document.getElementById(id).classList.remove('hidden');
-        document.body.style.alignItems = (id === 'login-screen' || id === 'menu-screen') ? "center" : "flex-start";
-    }
-
-    async function ejecutarLogin() {
-        const u = document.getElementById('user').value;
-        const p = document.getElementById('pass').value;
-        const res = await fetch('/login', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({nombre_usuario: u, contrasena: p}) });
-        const data = await res.json();
-        if(data.success) mostrarSeccion('menu-screen');
-        else document.getElementById('msg-error').innerText = "Acceso Denegado";
-    }
-
-    // --- PRODUCTOS ---
-    function abrirProductos() { mostrarSeccion('prod-screen'); listarProductos(); }
-    async function listarProductos() {
-        const res = await fetch('/productos');
-        const data = await res.json();
-        let html = '';
-        data.forEach(p => {
-            html += `<tr><td><img src="${p.imagen_url || ''}" class="img-tabla" onerror="this.src='https://via.placeholder.com/50'"></td>
-            <td>${p.codigo || ''}</td><td>${p.nombre}</td><td>${Number(p.precio).toLocaleString()}</td><td>${p.stock}</td>
-            <td><button class="btn-edit" onclick='prepararEdicion(${JSON.stringify(p)})'>Editar</button>
-            <button class="btn-del" onclick="eliminarProducto(${p.id})">Borrar</button></td></tr>`;
-        });
-        document.getElementById('lista-prod-body').innerHTML = html;
-    }
-
-    async function guardarProducto() {
-        const prod = { id: editandoId, codigo: document.getElementById('p-cod').value, nombre: document.getElementById('p-nom').value, 
-                       precio: document.getElementById('p-pre').value, stock: document.getElementById('p-stock').value, imagen_url: document.getElementById('p-img').value };
-        await fetch('/guardar-producto', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(prod) });
-        alert("Operación Exitosa");
-        location.reload(); 
-    }
-
-    // --- VENTAS (ESTO ES LO QUE FALTA) ---
-    function abrirVentas() {
-        mostrarSeccion('venta-screen');
-        carrito = [];
-        renderizarTabla();
-    }
-
-    async function buscarProducto() {
-    const term = document.getElementById('busc-producto').value;
-    const lista = document.getElementById('lista-productos');
-
-    if (term.length < 1) {
-        lista.innerHTML = '';
-        return;
-    }
-
-    // Marcador visual: El borde se pone azul mientras busca
-    document.getElementById('busc-producto').style.borderColor = "#3498db";
-
-    try {
-        const res = await fetch(`/buscar-producto?term=${encodeURIComponent(term)}`);
-        const data = await res.json();
-        
-        console.log("Productos encontrados:", data); // Ver en consola F12
-
-        let html = '';
-        if (data.length === 0) {
-            html = '<div class="sugerencia-item" style="color:red; background:white;">⚠️ No encontrado</div>';
-        } else {
-            data.forEach(p => {
-                // Limpiamos el nombre de comillas para evitar errores
-                const nombreLimpio = p.nombre.replace(/'/g, "");
-                html += `
-                <div class="sugerencia-item" 
-                     style="display:flex; align-items:center; gap:10px; padding:10px; border-bottom:1px solid #eee; cursor:pointer; background:white;"
-                     onclick="agregarAlCarrito(${p.id}, '${nombreLimpio}', ${p.precio}, '${p.imagen_url}')">
-                    <img src="${p.imagen_url || ''}" onerror="this.src='https://via.placeholder.com/40'" style="width:40px; height:40px; object-fit:cover;">
-                    <div>
-                        <div style="font-weight:bold;">${p.nombre}</div>
-                        <div style="font-size:12px; color:gray;">Stock: ${p.stock} | Gs. ${Number(p.precio).toLocaleString()}</div>
-                    </div>
-                </div>`;
-            });
-        }
-        lista.innerHTML = html;
-        lista.style.display = 'block'; // Forzamos que se vea
-    } catch (error) {
-        console.error("Error en búsqueda:", error);
-    } finally {
-        document.getElementById('busc-producto').style.borderColor = "#ddd";
-    }
-}
-    function agregarAlCarrito(id, nombre, precio, img) {
-        const existe = carrito.find(item => item.id === id);
-        if(existe) {
-            existe.cantidad++;
-        } else {
-            carrito.push({ id, nombre, precio, imagen_url: img, cantidad: 1 });
-        }
-        document.getElementById('busc-producto').value = '';
-        document.getElementById('lista-productos').innerHTML = '';
-        renderizarTabla();
-    }
-
-    function renderizarTabla() {
-        let html = '';
-        let total = 0;
-        carrito.forEach((p, i) => {
-            let subtotal = p.precio * p.cantidad;
-            total += subtotal;
-            html += `<tr>
-                <td><img src="${p.imagen_url}" class="img-tabla"></td>
-                <td>${p.nombre}</td>
-                <td>${Number(p.precio).toLocaleString()}</td>
-                <td><input type="number" value="${p.cantidad}" style="width:60px; margin:0" onchange="actualizarCantidad(${i}, this.value)"></td>
-                <td>${subtotal.toLocaleString()}</td>
-                <td><button onclick="quitarDelCarrito(${i})" style="background:red; width:auto; padding:5px 10px">X</button></td>
-            </tr>`;
-        });
-        document.getElementById('tabla-venta').innerHTML = html;
-        document.getElementById('gran-total').innerText = total.toLocaleString();
-    }
-
-    function actualizarCantidad(indice, valor) {
-        carrito[indice].cantidad = parseInt(valor);
-        renderizarTabla();
-    }
-
-    function quitarDelCarrito(indice) {
-        carrito.splice(indice, 1);
-        renderizarTabla();
-    }
-
-    async function finalizarVenta() {
-        if(carrito.length === 0) return alert("El carrito está vacío");
-        const total = parseInt(document.getElementById('gran-total').innerText.replace(/\./g, ''));
-        
-        const res = await fetch('/finalizar-venta', {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({ cliente: clienteActual.nombre, total: total, carrito: carrito })
-        });
-
-        if(res.ok) {
-            alert("Venta registrada con éxito");
-            carrito = [];
-            renderizarTabla();
-            mostrarSeccion('menu-screen');
-        }
-    }
-
-    async function abrirReportes() {
-        mostrarSeccion('reporte-screen');
-        const res = await fetch('/historial-ventas');
-        const data = await res.json();
-        let html = ''; let suma = 0;
-        data.forEach(v => {
-            suma += parseInt(v.total);
-            html += `<tr><td>${new Date(v.fecha).toLocaleString()}</td><td>${v.cliente}</td><td>${Number(v.total).toLocaleString()}</td>
-            <td><button onclick="alert('Venta ID: '+${v.id})" style="padding:5px; width:auto">Ver</button></td></tr>`;
-        });
-        document.getElementById('lista-ventas-body').innerHTML = html;
-        document.getElementById('total-ventas-valor').innerText = suma.toLocaleString();
-    }
-        function prepararEdicion(p) {
-            editandoId = p.id;
-            document.getElementById('p-cod').value = p.codigo;
-            document.getElementById('p-nom').value = p.nombre;
-            document.getElementById('p-pre').value = p.precio;
-            document.getElementById('p-stock').value = p.stock;
-            document.getElementById('p-img').value = p.imagen_url;
-            
-            document.getElementById('btn-guardar-prod').innerText = "ACTUALIZAR CAMBIOS";
-            document.getElementById('btn-guardar-prod').style.background = "#f39c12";
-            document.getElementById('btn-cancelar-edit').classList.remove('hidden');
-            window.scrollTo(0,0);
-        }
-
-        function limpiarFormularioProd() {
+            const prod = { id: editandoId, codigo: document.getElementById('p-cod').value, nombre: document.getElementById('p-nom').value, 
+                           precio: document.getElementById('p-pre').value, stock: document.getElementById('p-stock').value, imagen_url: document.getElementById('p-img').value };
+            await fetch('/guardar-producto', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(prod) });
+            alert("Listo");
+            abrirProductos();
             editandoId = null;
-            document.getElementById('p-cod').value = '';
-            document.getElementById('p-nom').value = '';
-            document.getElementById('p-pre').value = '';
-            document.getElementById('p-stock').value = '';
-            document.getElementById('p-img').value = '';
-            document.getElementById('btn-guardar-prod').innerText = "GUARDAR PRODUCTO";
-            document.getElementById('btn-guardar-prod').style.background = "#27ae60";
-            document.getElementById('btn-cancelar-edit').classList.add('hidden');
         }
 
-        async function guardarProducto() {
-            const prod = { 
-                id: editandoId, 
-                codigo: document.getElementById('p-cod').value, 
-                nombre: document.getElementById('p-nom').value, 
-                precio: document.getElementById('p-pre').value, 
-                stock: document.getElementById('p-stock').value, 
-                imagen_url: document.getElementById('p-img').value 
-            };
-            if(!prod.nombre) return alert("El nombre es obligatorio");
+        // --- VENTAS (BUSCADOR REPARADO) ---
+        function abrirVentas() { mostrarSeccion('venta-screen'); carrito = []; renderizarTabla(); }
 
-            const res = await fetch('/guardar-producto', { 
-                method: 'POST', 
-                headers: {'Content-Type': 'application/json'}, 
-                body: JSON.stringify(prod) 
-            });
-            
-            if(res.ok) {
-                alert(editandoId ? "Producto Actualizado" : "Producto Creado");
-                limpiarFormularioProd();
-                listarProductos();
-            }
-        }
-
-        async function eliminarProducto(id) {
-            if(confirm("¿Seguro que deseas eliminar este producto?")) {
-                await fetch(`/eliminar-producto/${id}`, { method: 'DELETE' });
-                listarProductos();
-            }
-        }
-
-        // --- SECCIÓN VENTAS ---
-        function abrirVentas() { mostrarSeccion('venta-screen'); }
         async function buscarProducto() {
-    const input = document.getElementById('busc-producto');
-    const term = input.value.trim();
-    const lista = document.getElementById('lista-productos');
+            const term = document.getElementById('busc-producto').value;
+            const lista = document.getElementById('lista-productos');
+            if(term.length < 1) { lista.classList.add('hidden'); return; }
 
-    // Si el cuadro está vacío, limpiar la lista y salir
-    if (term.length < 1) {
-        lista.innerHTML = '';
-        return;
-    }
-
-    try {
-        console.log("Buscando:", term); // Para ver en la consola si se activa
-        const res = await fetch(`/buscar-producto?term=${encodeURIComponent(term)}`);
-        
-        if (!res.ok) throw new Error("Error en servidor");
-
-        const data = await res.json();
-        
-        let html = '';
-        if (data.length === 0) {
-            html = '<div class="sugerencia-item" style="color:red">No se encontró el producto</div>';
-        } else {
-            data.forEach(p => {
-                html += `
-                <div class="sugerencia-item" onclick="agregarAlCarrito(${p.id}, '${p.nombre.replace(/'/g, "")}', ${p.precio}, '${p.imagen_url}')">
-                    <img src="${p.imagen_url || ''}" style="width:30px; height:30px; object-fit:cover; border-radius:3px;">
-                    <div>
-                        <strong style="display:block">${p.nombre}</strong>
-                        <small style="color:#7f8c8d">${p.codigo || 'S/C'} - ${Number(p.precio).toLocaleString()} Gs.</small>
-                    </div>
-                </div>`;
-            });
+            try {
+                const res = await fetch(`/buscar-producto?term=${encodeURIComponent(term)}`);
+                const data = await res.json();
+                
+                let html = '';
+                if(data.length > 0) {
+                    data.forEach(p => {
+                        html += `<div class="sugerencia-item" onclick="agregarAlCarrito(${p.id}, '${p.nombre.replace(/'/g, "")}', ${p.precio}, '${p.imagen_url}')">
+                            <img src="${p.imagen_url}" style="width:30px;height:30px;object-fit:cover">
+                            <span>${p.nombre} - <b>${Number(p.precio).toLocaleString()} Gs.</b></span>
+                        </div>`;
+                    });
+                    lista.innerHTML = html;
+                    lista.classList.remove('hidden');
+                } else {
+                    lista.innerHTML = '<div class="sugerencia-item">Sin resultados</div>';
+                    lista.classList.remove('hidden');
+                }
+            } catch(e) { console.error(e); }
         }
-        lista.innerHTML = html;
-    } catch (error) {
-        console.error("Fallo al buscar:", error);
-    }
-}
 
         function agregarAlCarrito(id, nombre, precio, img) {
-            const ex = carrito.find(i => i.id === id);
-            if(ex) ex.cantidad++; else carrito.push({id, nombre, precio, imagen_url: img, cantidad: 1});
-            document.getElementById('lista-productos').innerHTML = '';
+            const existe = carrito.find(i => i.id === id);
+            if(existe) existe.cantidad++;
+            else carrito.push({id, nombre, precio, cantidad: 1, img});
+            
             document.getElementById('busc-producto').value = '';
+            document.getElementById('lista-productos').classList.add('hidden');
             renderizarTabla();
         }
 
@@ -558,26 +204,26 @@
             let html = ''; let total = 0;
             carrito.forEach((p, i) => {
                 let sub = p.precio * p.cantidad; total += sub;
-                html += `<tr><td><img src="${p.imagen_url}" class="img-tabla"></td><td>${p.nombre}</td><td>${Number(p.precio).toLocaleString()}</td>
-                <td><input type="number" value="${p.cantidad}" style="width:60px;margin:0" onchange="carrito[${i}].cantidad=this.value;renderizarTabla()"></td>
-                <td>${sub.toLocaleString()}</td><td><button onclick="carrito.splice(${i},1);renderizarTabla()" style="background:red;width:auto;padding:5px">X</button></td></tr>`;
+                html += `<tr><td>${p.nombre}</td><td>${Number(p.precio).toLocaleString()}</td>
+                <td><input type="number" value="${p.cantidad}" style="width:50px;margin:0" onchange="carrito[${i}].cantidad=this.value;renderizarTabla()"></td>
+                <td>${sub.toLocaleString()}</td>
+                <td><button onclick="carrito.splice(${i},1);renderizarTabla()" style="background:red;padding:5px">X</button></td></tr>`;
             });
             document.getElementById('tabla-venta').innerHTML = html;
             document.getElementById('gran-total').innerText = total.toLocaleString();
         }
 
         async function finalizarVenta() {
-            if(carrito.length === 0) return alert("Carrito vacío");
-            const t = parseInt(document.getElementById('gran-total').innerText.replace(/\./g, ''));
+            if(carrito.length === 0) return;
+            const total = parseInt(document.getElementById('gran-total').innerText.replace(/\./g, ''));
             const res = await fetch('/finalizar-venta', { 
                 method: 'POST', 
                 headers: {'Content-Type': 'application/json'}, 
-                body: JSON.stringify({cliente: clienteActual.nombre, carrito, total: t})
+                body: JSON.stringify({ cliente: "Consumidor Final", total, carrito })
             });
-            if(res.ok) { alert("Venta Exitosa"); carrito = []; renderizarTabla(); }
+            if(res.ok) { alert("Venta Exitosa"); abrirVentas(); }
         }
 
-        // --- SECCIÓN REPORTES ---
         async function abrirReportes() {
             mostrarSeccion('reporte-screen');
             const res = await fetch('/historial-ventas');
@@ -585,23 +231,11 @@
             let html = ''; let suma = 0;
             data.forEach(v => {
                 suma += parseInt(v.total);
-                html += `<tr><td>${new Date(v.fecha).toLocaleString()}</td><td>${v.cliente}</td><td>${Number(v.total).toLocaleString()} Gs.</td>
-                <td><button onclick="alert('Venta ID: '+${v.id})" style="padding:5px;width:auto">Ver</button></td></tr>`;
+                html += `<tr><td>${new Date(v.fecha).toLocaleDateString()}</td><td>${v.cliente}</td><td>${Number(v.total).toLocaleString()}</td>
+                <td><button onclick="alert('ID:'+${v.id})" style="width:auto;padding:5px">Ver</button></td></tr>`;
             });
             document.getElementById('lista-ventas-body').innerHTML = html;
             document.getElementById('total-ventas-valor').innerText = suma.toLocaleString();
-        }
-
-        async function buscarCliente() {
-            const term = document.getElementById('busc-cliente').value;
-            if(term.length < 1) return;
-            const res = await fetch(`/buscar-cliente?term=${term}`);
-            const data = await res.json();
-            let html = '';
-            data.forEach(c => {
-                html += `<div class="sugerencia-item" onclick="clienteActual.nombre='${c.nombre}'; document.getElementById('cliente-seleccionado').innerHTML='Cliente: <b>${c.nombre}</b>'; document.getElementById('lista-clientes').innerHTML=''">${c.nombre}</div>`;
-            });
-            document.getElementById('lista-clientes').innerHTML = html;
         }
     </script>
 </body>
