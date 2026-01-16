@@ -56,12 +56,18 @@ app.delete('/eliminar-producto/:id', async (req, res) => {
 app.post('/finalizar-venta', async (req, res) => {
     const { cliente, total, carrito } = req.body;
     try {
-        // 1. Intentar registrar la venta
-        const venta = await pool.query(
-            'INSERT INTO ventas (cliente, total) VALUES ($1, $2) RETURNING id', 
-            [cliente, total]
-        );
+        const venta = await pool.query('INSERT INTO ventas (cliente, total) VALUES ($1, $2) RETURNING id', [cliente, total]);
         const ventaId = venta.rows[0].id;
+
+        for (const item of carrito) {
+            await pool.query('UPDATE productos SET stock = stock - $1 WHERE id = $2', [item.cantidad, item.id]);
+        }
+        res.status(200).json({ success: true });
+    } catch (err) {
+        // CAMBIO AQUÍ: Ahora enviamos el mensaje real del error
+        res.status(500).json({ error: err.message });
+    }
+});    
 
         // 2. Descontar stock de cada producto
         for (const item of carrito) {
@@ -105,4 +111,5 @@ app.get('*', (req, res) => { res.sendFile(path.join(__dirname, 'index.html')); }
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => { console.log(`Servidor en puerto ${PORT}`); });
+
 
