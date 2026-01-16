@@ -73,12 +73,48 @@
         </div>
     </div>
 
-    <div id="venta-screen" class="card full-screen hidden">
+        <div id="venta-screen" class="card full-screen hidden">
         <button onclick="mostrarSeccion('menu-screen')" style="width:auto; background:#7f8c8d;">← Volver</button>
-        <h3>Módulo de Ventas</h3>
-        <p>Seleccione productos en la tabla...</p>
-    </div>
+        <h3>Nueva Venta</h3>
+        
+        <div style="display: flex; flex-wrap: wrap; gap: 15px;">
+            <div class="section" style="flex: 1; min-width: 250px;">
+                <label><strong>Cliente:</strong></label>
+                <input type="text" id="busc-cliente" placeholder="Buscar cliente..." onkeyup="buscarCliente()">
+                <div id="lista-clientes" class="sugerencias"></div>
+                <p id="cliente-seleccionado" style="margin-top:5px; color:#2980b9;">Seleccionado: <b>Consumidor Final</b></p>
+            </div>
 
+            <div class="section" style="flex: 1; min-width: 250px;">
+                <label><strong>Buscar Producto:</strong></label>
+                <input type="text" id="busc-producto" placeholder="Escribe nombre o código..." onkeyup="buscarProducto()">
+                <div id="lista-productos" class="sugerencias"></div>
+            </div>
+        </div>
+
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Foto</th>
+                        <th>Producto</th>
+                        <th>Precio</th>
+                        <th>Cantidad</th>
+                        <th>Subtotal</th>
+                        <th>Acción</th>
+                    </tr>
+                </thead>
+                <tbody id="tabla-venta">
+                    </tbody>
+            </table>
+        </div>
+
+        <div style="text-align: right; margin-top: 20px;">
+            <h2 style="margin: 0; color: #2c3e50;">Total: <span id="gran-total">0</span> Gs.</h2>
+            <br>
+            <button onclick="finalizarVenta()" style="background:#27ae60; font-size:20px; width: 300px;">REGISTRAR VENTA</button>
+        </div>
+    </div> 
     <div id="reporte-screen" class="card full-screen hidden">
         <button onclick="mostrarSeccion('menu-screen')" style="width:auto; background:#7f8c8d;">← Volver</button>
         <h3>Reporte de Ventas</h3>
