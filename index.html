@@ -479,18 +479,44 @@
         // --- SECCIÓN VENTAS ---
         function abrirVentas() { mostrarSeccion('venta-screen'); }
         async function buscarProducto() {
-            const term = document.getElementById('busc-producto').value;
-            if(term.length < 1) { document.getElementById('lista-productos').innerHTML = ''; return; }
-            const res = await fetch(`/buscar-producto?term=${term}`);
-            const data = await res.json();
-            let html = '';
+    const input = document.getElementById('busc-producto');
+    const term = input.value.trim();
+    const lista = document.getElementById('lista-productos');
+
+    // Si el cuadro está vacío, limpiar la lista y salir
+    if (term.length < 1) {
+        lista.innerHTML = '';
+        return;
+    }
+
+    try {
+        console.log("Buscando:", term); // Para ver en la consola si se activa
+        const res = await fetch(`/buscar-producto?term=${encodeURIComponent(term)}`);
+        
+        if (!res.ok) throw new Error("Error en servidor");
+
+        const data = await res.json();
+        
+        let html = '';
+        if (data.length === 0) {
+            html = '<div class="sugerencia-item" style="color:red">No se encontró el producto</div>';
+        } else {
             data.forEach(p => {
-                html += `<div class="sugerencia-item" onclick="agregarAlCarrito(${p.id}, '${p.nombre}', ${p.precio}, '${p.imagen_url}')">
-                    ${p.nombre} (${p.precio} Gs.)
+                html += `
+                <div class="sugerencia-item" onclick="agregarAlCarrito(${p.id}, '${p.nombre.replace(/'/g, "")}', ${p.precio}, '${p.imagen_url}')">
+                    <img src="${p.imagen_url || ''}" style="width:30px; height:30px; object-fit:cover; border-radius:3px;">
+                    <div>
+                        <strong style="display:block">${p.nombre}</strong>
+                        <small style="color:#7f8c8d">${p.codigo || 'S/C'} - ${Number(p.precio).toLocaleString()} Gs.</small>
+                    </div>
                 </div>`;
             });
-            document.getElementById('lista-productos').innerHTML = html;
         }
+        lista.innerHTML = html;
+    } catch (error) {
+        console.error("Fallo al buscar:", error);
+    }
+}
 
         function agregarAlCarrito(id, nombre, precio, img) {
             const ex = carrito.find(i => i.id === id);
