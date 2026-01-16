@@ -62,19 +62,17 @@ app.delete('/eliminar-producto/:id', async (req, res) => {
 });
 // RUTA PARA BUSCAR PRODUCTOS EN VENTAS
 app.get('/buscar-producto', async (req, res) => {
-    const { term } = req.query;
     try {
-        // Busca por nombre o código que contenga el texto ingresado
-        const result = await pool.query(
-            'SELECT * FROM productos WHERE nombre ILIKE $1 OR codigo ILIKE $1 LIMIT 8', 
-            [`%${term}%`]
-        );
+        const { term } = req.query;
+        // El ILIKE y los % son los que hacen que encuentre "coca" dentro de "Coca Cola"
+        const queryText = "SELECT * FROM productos WHERE nombre ILIKE $1 OR codigo ILIKE $1 LIMIT 10";
+        const values = [`%${term}%`];
+        const result = await pool.query(queryText, values);
         res.json(result.rows);
     } catch (err) {
-        console.error("Error en búsqueda:", err);
-        res.status(500).json({ error: "Error en la búsqueda" });
+        console.error(err);
+        res.status(500).json({ error: "Error en el servidor" });
     }
-});
 });
 
 app.post('/finalizar-venta', async (req, res) => {
@@ -110,4 +108,5 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`Servidor en puerto ${PORT}`);
 });
+
 
