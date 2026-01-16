@@ -282,16 +282,46 @@ async function eliminarProducto(id) {
             document.getElementById('gran-total').innerText = total.toLocaleString();
         }
 
-        async function finalizarVenta() {
-            if(carrito.length === 0) return;
-            const total = parseInt(document.getElementById('gran-total').innerText.replace(/\./g, ''));
-            const res = await fetch('/finalizar-venta', { 
-                method: 'POST', 
-                headers: {'Content-Type': 'application/json'}, 
-                body: JSON.stringify({ cliente: "Consumidor Final", total, carrito })
-            });
-            if(res.ok) { alert("Venta Exitosa"); abrirVentas(); }
+       async function finalizarVenta() {
+    // 1. Validamos que haya productos
+    if (carrito.length === 0) {
+        alert("⚠️ El carrito está vacío. Agrega productos antes de vender.");
+        return;
+    }
+
+    // 2. Calculamos el total (quitando puntos de formato si los hay)
+    const totalTexto = document.getElementById('gran-total').innerText;
+    const totalNum = parseInt(totalTexto.replace(/\./g, ''));
+
+    console.log("Enviando venta...", { cliente: "Consumidor Final", total: totalNum, carrito: carrito });
+
+    try {
+        const res = await fetch('/finalizar-venta', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                cliente: "Consumidor Final",
+                total: totalNum,
+                carrito: carrito // Aquí enviamos la lista de productos elegidos
+            })
+        });
+
+        if (res.ok) {
+            alert("✅ ¡Venta registrada con éxito!");
+            // Limpiamos todo para la siguiente venta
+            carrito = [];
+            renderizarTabla();
+            document.getElementById('busc-producto').value = '';
+            mostrarSeccion('menu-screen'); // Volvemos al menú
+        } else {
+            const errorData = await res.json();
+            alert("❌ Error en el servidor: " + (errorData.error || "No se pudo procesar"));
         }
+    } catch (error) {
+        console.error("Error en la conexión:", error);
+        alert("❌ Error de red: No se pudo conectar con el servidor.");
+    }
+}
 
         async function abrirReportes() {
             mostrarSeccion('reporte-screen');
