@@ -168,14 +168,68 @@
 }
 
         async function guardarProducto() {
-            const prod = { id: editandoId, codigo: document.getElementById('p-cod').value, nombre: document.getElementById('p-nom').value, 
-                           precio: document.getElementById('p-pre').value, stock: document.getElementById('p-stock').value, imagen_url: document.getElementById('p-img').value };
-            await fetch('/guardar-producto', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(prod) });
-            alert("Listo");
-            abrirProductos();
-            editandoId = null;
-        }
+    // 1. Recolectamos los datos de los campos
+    const id = editandoId; // Si es null, el servidor crea uno nuevo. Si tiene número, edita.
+    const codigo = document.getElementById('p-cod').value;
+    const nombre = document.getElementById('p-nom').value;
+    const precio = document.getElementById('p-pre').value;
+    const stock = document.getElementById('p-stock').value;
+    const imagen_url = document.getElementById('p-img').value;
 
+    // Validación básica: No permitir guardar sin nombre o precio
+    if (!nombre || !precio) {
+        alert("Por favor, completa al menos el nombre y el precio.");
+        return;
+    }
+
+    try {
+        const res = await fetch('/guardar-producto', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id, codigo, nombre, precio, stock, imagen_url })
+        });
+
+        if (res.ok) {
+            alert(id ? "✅ Producto actualizado con éxito" : "✅ Producto guardado correctamente");
+            
+            // 2. RESETEAR EL ESTADO (Muy importante)
+            editandoId = null; // Volvemos a modo "Crear"
+            
+            // 3. Limpiar los cuadritos de texto
+            document.getElementById('p-cod').value = '';
+            document.getElementById('p-nom').value = '';
+            document.getElementById('p-pre').value = '';
+            document.getElementById('p-stock').value = '';
+            document.getElementById('p-img').value = '';
+
+            // 4. Regresar el botón a su estado original
+            const btn = document.getElementById('btn-guardar-prod');
+            btn.innerText = "GUARDAR PRODUCTO";
+            btn.style.background = "#27ae60";
+
+            // 5. Refrescar la tabla para ver los cambios
+            listarProductos();
+        } else {
+            alert("❌ Error al guardar en el servidor");
+        }
+    } catch (error) {
+        console.error("Error:", error);
+        alert("❌ No se pudo conectar con el servidor");
+    }
+}
+async function eliminarProducto(id) {
+    if (confirm("¿Seguro que quieres eliminar este producto? Esta acción no se puede deshacer.")) {
+        try {
+            const res = await fetch(`/eliminar-producto/${id}`, { method: 'DELETE' });
+            if (res.ok) {
+                alert("Producto eliminado");
+                listarProductos();
+            }
+        } catch (error) {
+            alert("Error al intentar eliminar");
+        }
+    }
+}
         // --- VENTAS (BUSCADOR REPARADO) ---
         function abrirVentas() { mostrarSeccion('venta-screen'); carrito = []; renderizarTabla(); }
 
