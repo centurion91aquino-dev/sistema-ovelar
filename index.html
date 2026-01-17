@@ -46,6 +46,8 @@
         .sugerencia-item:hover { background: #ebf5fb; }
     </style>
 </head>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
 <body>
 
     <div id="login-screen" class="card">
@@ -283,10 +285,39 @@ async function eliminarProducto(id) {
         }
 
        async function finalizarVenta() {
-    // 1. Validamos que haya productos
-    if (carrito.length === 0) {
-        alert("⚠️ El carrito está vacío. Agrega productos antes de vender.");
-        return;
+    if (carrito.length === 0) return alert("Carrito vacío");
+
+    const totalTexto = document.getElementById('gran-total').innerText;
+    const totalNum = parseInt(totalTexto.replace(/\./g, ''));
+
+    try {
+        const res = await fetch('/finalizar-venta', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                cliente: "Consumidor Final",
+                total: totalNum,
+                carrito: carrito
+            })
+        });
+
+        if (res.ok) {
+            // --- AQUÍ GENERAMOS EL PDF ANTES DE LIMPIAR ---
+            generarPDF({
+                cliente: "Consumidor Final",
+                total: totalNum,
+                carrito: [...carrito] // Pasamos una copia del carrito
+            });
+
+            alert("✅ Venta y Factura generadas");
+            carrito = [];
+            renderizarTabla();
+            mostrarSeccion('menu-screen');
+        }
+    } catch (error) {
+        alert("Error al procesar");
+    }
+}
     }
 
     // 2. Calculamos el total (quitando puntos de formato si los hay)
@@ -321,6 +352,55 @@ async function eliminarProducto(id) {
         console.error("Error en la conexión:", error);
         alert("❌ Error de red: No se pudo conectar con el servidor.");
     }
+}function generarPDF(datosVenta) {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF(); // Formato A4 por defecto
+
+    // Encabezado de Factura
+    doc.setFontSize(18);
+    doc.text("FACTURA COMERCIAL", 105, 20, { align: "center" });
+    
+    doc.setFontSize(10);
+    doc.text("MI NEGOCIO S.A.", 20, 30);
+    doc.text("RUC: 80012345-6", 20, 35);
+    doc.text("Dirección: Av. Principal - CDE", 20, 40);
+    
+    doc.text(`Fecha: ${new Date().toLocaleDateString()}`, 150, 30);
+    doc.text(`Factura N°: 001-001-000${Math.floor(Math.random() * 1000)}`, 150, 35);
+
+    // Datos del Cliente
+    doc.rect(20, 50, 170, 15); // Un recuadro para el cliente
+    doc.text(`CLIENTE: ${datosVenta.cliente}`, 25, 60);
+
+    // Tabla de Productos
+    const filas = datosVenta.carrito.map(item => [
+        item.id,
+        item.nombre,
+        item.cantidad,
+        `${parseInt(item.precio).toLocaleString()} Gs.`,
+        `${(item.cantidad * item.precio).toLocaleString()} Gs.`
+    ]);
+
+    doc.autoTable({
+        startY: 70,
+        head: [['ID', 'Descripción', 'Cant.', 'Precio Unit.', 'Subtotal']],
+        body: filas,
+        headStyles: { fillColor: [41, 128, 185] }, // Azul profesional
+        styles: { halign: 'center' },
+        columnStyles: { 1: { halign: 'left' } }
+    });
+
+    // Total final
+    const finalY = doc.lastAutoTable.finalY + 10;
+    doc.setFontSize(14);
+    doc.text(`TOTAL A PAGAR: ${datosVenta.total.toLocaleString()} Gs.`, 190, finalY, { align: "right" });
+
+    // Pie de página
+    doc.setFontSize(9);
+    doc.text("Original: Cliente / Duplicado: Archivo", 105, 280, { align: "center" });
+
+    // Descargar
+    doc.save(`Factura_${Date.now()}.pdf`);
 }
 
         async function abrirReportes() {
