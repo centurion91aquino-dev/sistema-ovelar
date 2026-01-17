@@ -19,7 +19,6 @@ app.use(express.static(path.join(__dirname, '/')));
 
 // --- RUTAS DE PRODUCTOS ---
 
-// Listar todos los productos
 app.get('/productos', async (req, res) => {
     try {
         const result = await pool.query('SELECT * FROM productos ORDER BY id DESC');
@@ -29,7 +28,6 @@ app.get('/productos', async (req, res) => {
     }
 });
 
-// Guardar o Editar producto
 app.post('/guardar-producto', async (req, res) => {
     const { id, codigo, nombre, precio, stock, imagen_url } = req.body;
     try {
@@ -50,7 +48,6 @@ app.post('/guardar-producto', async (req, res) => {
     }
 });
 
-// Buscador para Ventas
 app.get('/buscar-producto', async (req, res) => {
     const { term } = req.query;
     try {
@@ -64,7 +61,6 @@ app.get('/buscar-producto', async (req, res) => {
     }
 });
 
-// Eliminar producto
 app.delete('/eliminar-producto/:id', async (req, res) => {
     try {
         await pool.query('DELETE FROM productos WHERE id = $1', [req.params.id]);
@@ -74,27 +70,31 @@ app.delete('/eliminar-producto/:id', async (req, res) => {
     }
 });
 
-// --- RUTA DE VENTAS (MÁXIMA ESTABILIDAD) ---
+// --- RUTA DE VENTAS MEJORADA (Guarda detalles) ---
 
-// Asegúrate de que diga "async (req, res)" al principio
 app.post('/finalizar-venta', async (req, res) => {
     const { cliente, total, carrito } = req.body;
-    
-    // Pedimos un cliente al pool para la transacción
     const client = await pool.connect();
     
     try {
         await client.query('BEGIN');
 
-        // 1. Insertar la venta
+        // 1. Insertar la venta principal
         const ventaRes = await client.query(
             'INSERT INTO ventas (cliente, total) VALUES ($1, $2) RETURNING id',
             [cliente || 'Consumidor Final', total]
         );
         const ventaId = ventaRes.rows[0].id;
 
-        // 2. Descontar stock
+        // 2. Guardar cada producto en detalle_ventas y descontar stock
         for (const item of carrito) {
+            // Guardar detalle
+            await client.query(
+                'INSERT INTO detalle_ventas (venta_id, producto_id, cantidad, precio) VALUES ($1, $2, $3, $4)',
+                [ventaId, item.id, item.cantidad, item.precio]
+            );
+
+            // Descontar stock
             await client.query(
                 'UPDATE productos SET stock = stock - $1 WHERE id = $2',
                 [item.cantidad, item.id]
@@ -102,54 +102,19 @@ app.post('/finalizar-venta', async (req, res) => {
         }
 
         await client.query('COMMIT');
-        res.status(200).json({ success: true });
+        res.status(200).json({ success: true, ventaId: ventaId });
 
     } catch (err) {
         await client.query('ROLLBACK');
-        console.error("DETALLE ERROR VENTA:", err.message);
-        res.status(500).json({ error: "Error en BD: " + err.message });
-    } finally {
-        client.release();
-    }
-});
-        // 1. Insertar la venta
-        const ventaRes = await client.query(
-            'INSERT INTO ventas (cliente, total) VALUES ($1, $2) RETURNING id',
-            [cliente || 'Consumidor Final', total]
-        );
-        const ventaId = ventaRes.rows[0].id;
-
-       // 2. Descontar stock por cada producto en el carrito
-        for (const item of carrito) {
-            // Verificamos que el producto existe y restamos stock
-            const stockRes = await client.query( // <-- Asegúrate que diga await aquí
-                'UPDATE productos SET stock = stock - $1 WHERE id = $2',
-                [item.cantidad, item.id]
-            );
-            
-            if (stockRes.rowCount === 0) {
-                throw new Error(`El producto con ID ${item.id} no existe.`);
-            }
-        }
-            
-            if (stockRes.rowCount === 0) {
-                throw new Error(`El producto con ID ${item.id} no existe.`);
-            }
-        }
-
-        await client.query('COMMIT');
-        res.status(200).json({ success: true });
-
-    } catch (err) {
-        await client.query('ROLLBACK');
-        console.error("DETALLE ERROR VENTA:", err.message);
-        res.status(500).json({ error: "Error en BD: " + err.message });
+        console.error("ERROR EN VENTA:", err.message);
+        res.status(500).json({ error: err.message });
     } finally {
         client.release();
     }
 });
 
-// Historial de ventas para Reportes
+// --- REPORTES Y CONSULTAS ---
+
 app.get('/historial-ventas', async (req, res) => {
     try {
         const result = await pool.query('SELECT * FROM ventas ORDER BY fecha DESC');
@@ -158,6 +123,7 @@ app.get('/historial-ventas', async (req, res) => {
         res.status(500).json({ error: err.message });
     }
 });
+
 app.get('/detalle-venta/:id', async (req, res) => {
     try {
         const { id } = req.params;
@@ -166,14 +132,12 @@ app.get('/detalle-venta/:id', async (req, res) => {
             FROM detalle_ventas dv 
             JOIN productos p ON dv.producto_id = p.id 
             WHERE dv.venta_id = $1`, [id]);
-        
         res.json(result.rows);
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
 });
 
-// --- LOGIN ---
 app.post('/login', async (req, res) => {
     const { nombre_usuario, contrasena } = req.body;
     try {
@@ -187,16 +151,11 @@ app.post('/login', async (req, res) => {
     }
 });
 
-// Manejo de cualquier otra ruta
 app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
 
-// Iniciar Servidor
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`Servidor corriendo en puerto ${PORT}`);
 });
-
-
-
