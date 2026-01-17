@@ -158,6 +158,20 @@ app.get('/historial-ventas', async (req, res) => {
         res.status(500).json({ error: err.message });
     }
 });
+app.get('/detalle-venta/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const result = await pool.query(`
+            SELECT dv.*, p.nombre 
+            FROM detalle_ventas dv 
+            JOIN productos p ON dv.producto_id = p.id 
+            WHERE dv.venta_id = $1`, [id]);
+        
+        res.json(result.rows);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
 
 // --- LOGIN ---
 app.post('/login', async (req, res) => {
@@ -183,5 +197,6 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`Servidor corriendo en puerto ${PORT}`);
 });
+
 
 
