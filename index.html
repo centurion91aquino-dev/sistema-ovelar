@@ -403,14 +403,39 @@ async function eliminarProducto(id) {
     doc.save(`Factura_${Date.now()}.pdf`);
 }
 async function verTicket(idVenta) {
+    console.log("Consultando la venta con ID:", idVenta); // Esto aparecerá en la consola (F12)
+    
     try {
-        // 1. Buscamos los productos de esa venta
+        // Consultamos al servidor los detalles de esa venta específica
         const res = await fetch(`/detalle-venta/${idVenta}`);
         const detalles = await res.json();
 
-        if (detalles.length === 0) return alert("No se encontraron detalles para esta venta.");
+        if (!detalles || detalles.length === 0) {
+            return alert("No se encontraron productos para esta venta.");
+        }
 
-        // 2. Calculamos el total sumando los subtotales
+        // Calculamos el total de esa venta
+        const totalVenta = detalles.reduce((acc, item) => acc + (item.cantidad * item.precio), 0);
+
+        // Preparamos los datos para el PDF
+        const datosVenta = {
+            cliente: "Cliente - Venta #" + idVenta,
+            total: totalVenta,
+            carrito: detalles.map(d => ({
+                nombre: d.nombre,
+                cantidad: d.cantidad,
+                precio: d.precio
+            }))
+        };
+
+        // Llamamos a la función que ya tenemos para generar el PDF
+        generarPDF(datosVenta);
+
+    } catch (error) {
+        console.error("Error completo:", error);
+        alert("Hubo un problema al conectar con el servidor.");
+    }
+}        // 2. Calculamos el total sumando los subtotales
         const totalVenta = detalles.reduce((acc, item) => acc + (item.cantidad * item.precio), 0);
 
         // 3. Mapeamos los datos para que la función generarPDF los entienda
