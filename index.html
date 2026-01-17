@@ -402,7 +402,36 @@ async function eliminarProducto(id) {
     // Descargar
     doc.save(`Factura_${Date.now()}.pdf`);
 }
+async function verTicket(idVenta) {
+    try {
+        // 1. Buscamos los productos de esa venta
+        const res = await fetch(`/detalle-venta/${idVenta}`);
+        const detalles = await res.json();
 
+        if (detalles.length === 0) return alert("No se encontraron detalles para esta venta.");
+
+        // 2. Calculamos el total sumando los subtotales
+        const totalVenta = detalles.reduce((acc, item) => acc + (item.cantidad * item.precio), 0);
+
+        // 3. Mapeamos los datos para que la función generarPDF los entienda
+        const datosParaPdf = {
+            cliente: "Cliente Histórico", // O podrías traer el nombre real desde la tabla ventas
+            total: totalVenta,
+            carrito: detalles.map(d => ({
+                nombre: d.nombre,
+                cantidad: d.cantidad,
+                precio: d.precio
+            }))
+        };
+
+        // 4. Re-generamos el PDF
+        generarPDF(datosParaPdf);
+
+    } catch (error) {
+        console.error("Error al recuperar el ticket:", error);
+        alert("Error al cargar los datos de la venta.");
+    }
+}
         async function abrirReportes() {
             mostrarSeccion('reporte-screen');
             const res = await fetch('/historial-ventas');
